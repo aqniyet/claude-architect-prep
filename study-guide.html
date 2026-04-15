@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Guide — Claude Certified Architect Foundations</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3340;
+    --text: #e2e4e9;
+    --text-dim: #8b8fa3;
+    --accent: #c4956a;
+    --accent-light: #dbb592;
+    --green: #4ade80;
+    --green-bg: rgba(74,222,128,0.08);
+    --red: #f87171;
+    --blue: #7c9bf5;
+    --purple: #b58bf5;
+    --orange: #f5a35b;
+    --teal: #5be0b5;
+    --pink: #f57088;
+    --highlight: #2a2520;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  header {
+    padding: 3rem 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    max-width: 640px;
+  }
+
+  /* Navigation */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .toc h2 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .toc-list li a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.35rem 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    transition: color 0.2s;
+  }
+
+  .toc-list li a:hover { color: var(--accent); }
+
+  .toc-num {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: 28px;
+    flex-shrink: 0;
+  }
+
+  .toc-sub {
+    list-style: none;
+    padding-left: 2.5rem;
+  }
+
+  .toc-sub li a {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  /* Chapters */
+  .chapter {
+    margin-bottom: 4rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .chapter-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chapter-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .chapter-label.ch1 { color: var(--orange); }
+  .chapter-label.ch2 { color: var(--teal); }
+  .chapter-label.ch3 { color: var(--purple); }
+  .chapter-label.ch4 { color: var(--blue); }
+
+  .chapter-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .chapter-header p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Lesson blocks */
+  .lesson {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 2rem;
+  }
+
+  .lesson h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .lesson h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent-light);
+  }
+
+  .lesson p {
+    font-size: 0.92rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .lesson ul, .lesson ol {
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .lesson li {
+    font-size: 0.92rem;
+    margin-bottom: 0.4rem;
+  }
+
+  /* Callouts */
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+
+  .note.key {
+    border-left: 3px solid var(--accent);
+    background: var(--highlight);
+  }
+
+  .note.think {
+    border-left: 3px solid var(--blue);
+    background: rgba(124,155,245,0.04);
+  }
+
+  .note.build {
+    border-left: 3px solid var(--teal);
+    background: rgba(91,224,181,0.04);
+  }
+
+  .note-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.35rem;
+  }
+
+  .note.key .note-label { color: var(--accent); }
+  .note.think .note-label { color: var(--blue); }
+  .note.build .note-label { color: var(--teal); }
+
+  /* Code */
+  code {
+    background: var(--surface2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.87em;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    color: var(--accent-light);
+  }
+
+  .codeblock {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    margin: 0.75rem 0 1rem;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-dim);
+  }
+
+  .codeblock .comment { color: #5a6070; }
+  .codeblock .highlight { color: var(--accent-light); }
+
+  /* Diagrams */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .diagram-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .flow-box {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    flex: 1;
+  }
+
+  .flow-box.a { background: rgba(124,155,245,0.08); border-color: rgba(124,155,245,0.25); }
+  .flow-box.b { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.2); }
+  .flow-box.c { background: rgba(245,163,91,0.06); border-color: rgba(245,163,91,0.2); }
+  .flow-box.d { background: rgba(181,139,245,0.06); border-color: rgba(181,139,245,0.2); }
+  .flow-box.e { background: rgba(91,224,181,0.06); border-color: rgba(91,224,181,0.2); }
+
+  .flow-arrow {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.15rem 0;
+  }
+
+  .flow-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    width: 80px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0 1rem;
+    font-size: 0.85rem;
+  }
+
+  th {
+    background: var(--surface2);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* Scenario examples */
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+  }
+
+  .scenario-q {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .scenario-a {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+  }
+
+  .tag.structural { background: rgba(74,222,128,0.12); color: var(--green); }
+  .tag.programmatic { background: rgba(124,155,245,0.12); color: var(--blue); }
+  .tag.prompt { background: rgba(245,163,91,0.12); color: var(--orange); }
+
+  /* Section divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 1rem 1rem 3rem; }
+    header h1 { font-size: 1.4rem; }
+    .flow-label { width: 60px; font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>Claude Architect Foundations &mdash; Study Guide</h1>
+  <p>Four chapters covering your gap areas from basics to exam-level depth. Each chapter starts with the core mental model, then layers on details. Read in order.</p>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul class="toc-list">
+    <li>
+      <a href="#ch1"><span class="toc-num">01</span> How Claude Code Is Configured</a>
+      <ul class="toc-sub">
+        <li><a href="#ch1-1">The problem configuration solves</a></li>
+        <li><a href="#ch1-2">The four configuration surfaces</a></li>
+        <li><a href="#ch1-3">Shared vs personal: the two-tier rule</a></li>
+        <li><a href="#ch1-4">Path-scoped rules and when you need them</a></li>
+        <li><a href="#ch1-5">Skills and their frontmatter</a></li>
+        <li><a href="#ch1-6">Running Claude Code in CI/CD</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#ch2"><span class="toc-num">02</span> Getting Structured Data Out of Claude</a>
+      <ul class="toc-sub">
+        <li><a href="#ch2-1">Why text output breaks in production</a></li>
+        <li><a href="#ch2-2">tool_use as a structured output mechanism</a></li>
+        <li><a href="#ch2-3">Controlling when the model calls tools</a></li>
+        <li><a href="#ch2-4">Designing schemas that prevent hallucination</a></li>
+        <li><a href="#ch2-5">When extraction fails: validation and retry</a></li>
+        <li><a href="#ch2-6">The Batch API and its constraints</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#ch3"><span class="toc-num">03</span> Designing Tools and Distributing Them</a>
+      <ul class="toc-sub">
+        <li><a href="#ch3-1">How Claude chooses which tool to call</a></li>
+        <li><a href="#ch3-2">Writing descriptions that work</a></li>
+        <li><a href="#ch3-3">The tool count problem</a></li>
+        <li><a href="#ch3-4">MCP servers: where configuration lives</a></li>
+        <li><a href="#ch3-5">Structured errors for intelligent recovery</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#ch4"><span class="toc-num">04</span> Managing Context and Information</a>
+      <ul class="toc-sub">
+        <li><a href="#ch4-1">Why context degrades in long sessions</a></li>
+        <li><a href="#ch4-2">Session management: resume, fresh start, fork</a></li>
+        <li><a href="#ch4-3">Preserving facts across summarization</a></li>
+        <li><a href="#ch4-4">Provenance: keeping track of where things came from</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+<!-- ============================================================ -->
+<!-- CHAPTER 1: Claude Code Configuration -->
+<!-- ============================================================ -->
+<div class="chapter" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-label ch1">Chapter 01</div>
+    <h2>How Claude Code Is Configured</h2>
+    <p>Claude Code is a tool that reads your codebase and follows instructions. But where do those instructions come from? This chapter explains the entire configuration system from first principles.</p>
+  </div>
+
+  <div class="lesson" id="ch1-1">
+    <h3>The Problem Configuration Solves</h3>
+    <p>Imagine you have a team of 8 developers. You want Claude Code to:</p>
+    <ul>
+      <li>Follow your team's coding standards (everyone)</li>
+      <li>Use different conventions for React components vs API handlers vs test files</li>
+      <li>Connect to your company's GitHub and Jira through MCP</li>
+      <li>Let one developer experiment with a personal database tool without affecting others</li>
+      <li>Run automatically in your CI pipeline with no human interaction</li>
+    </ul>
+    <p>Each of these needs requires a different configuration mechanism. Claude Code doesn't have a single "settings file" &mdash; it has a layered system where different types of configuration live in different places, for good reason.</p>
+  </div>
+
+  <div class="lesson" id="ch1-2">
+    <h3>The Four Configuration Surfaces</h3>
+    <p>Claude Code has four distinct things you can configure. Each one has its own file format and location:</p>
+
+    <table>
+      <tr><th>Surface</th><th>What It Contains</th><th>Format</th></tr>
+      <tr>
+        <td><strong>Instructions</strong><br>(CLAUDE.md)</td>
+        <td>Prose instructions: coding standards, conventions, architecture notes, what tools to prefer</td>
+        <td>Markdown files</td>
+      </tr>
+      <tr>
+        <td><strong>MCP Servers</strong><br>(connection config)</td>
+        <td>External tool servers: GitHub, Jira, databases, custom APIs</td>
+        <td>JSON files</td>
+      </tr>
+      <tr>
+        <td><strong>Commands</strong><br>(slash commands)</td>
+        <td>Reusable prompt templates invoked with <code>/command-name</code></td>
+        <td>Markdown files in directories</td>
+      </tr>
+      <tr>
+        <td><strong>Skills</strong><br>(advanced commands)</td>
+        <td>Like commands but with isolation options, tool restrictions, and argument hints</td>
+        <td>SKILL.md with YAML frontmatter</td>
+      </tr>
+    </table>
+
+    <p>These are separate systems. Instructions go in CLAUDE.md, server connections go in JSON files, commands go in their own directory. They never mix. You would never put MCP server configuration inside CLAUDE.md, or put coding standards in a JSON config file.</p>
+
+    <div class="note key">
+      <div class="note-label">Key Principle</div>
+      <strong>Instructions = Markdown. Connections = JSON. Commands/Skills = their own directories.</strong> If an exam question mixes these up (e.g., "put server config in CLAUDE.md"), that option is wrong.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch1-3">
+    <h3>Shared vs Personal: The Two-Tier Rule</h3>
+
+    <p>Every configuration surface has two tiers:</p>
+
+    <div class="diagram">
+      <div class="diagram-title">The Two-Tier Model</div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-label">Shared</div>
+          <div class="flow-box b">Lives in the <strong>project directory</strong>. Committed to git. Every teammate gets it when they clone.</div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-label">Personal</div>
+          <div class="flow-box a">Lives in your <strong>home directory</strong> (<code>~/</code>). Never committed. Only you have it.</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Here's the complete map:</p>
+
+    <table>
+      <tr><th>Surface</th><th>Shared (Project)</th><th>Personal (Home)</th></tr>
+      <tr>
+        <td>Instructions</td>
+        <td><code>.claude/CLAUDE.md</code> or root <code>CLAUDE.md</code></td>
+        <td><code>~/.claude/CLAUDE.md</code></td>
+      </tr>
+      <tr>
+        <td>MCP Servers</td>
+        <td><code>.mcp.json</code></td>
+        <td><code>~/.claude.json</code></td>
+      </tr>
+      <tr>
+        <td>Commands</td>
+        <td><code>.claude/commands/</code></td>
+        <td><code>~/.claude/commands/</code></td>
+      </tr>
+      <tr>
+        <td>Skills</td>
+        <td><code>.claude/skills/</code></td>
+        <td><code>~/.claude/skills/</code></td>
+      </tr>
+    </table>
+
+    <p>The pattern is consistent: project-level config lives under <code>.claude/</code> in your repo, personal config lives under <code>~/.claude/</code> in your home directory. The one exception is MCP: project = <code>.mcp.json</code> (at repo root), personal = <code>~/.claude.json</code>.</p>
+
+    <div class="note think">
+      <div class="note-label">Think About It</div>
+      A new developer joins the team and Claude Code doesn't follow team standards. If the standards were in <code>~/.claude/CLAUDE.md</code>, that's the problem &mdash; it's personal config, never shared via git. The fix is always: move it to project-level <code>.claude/CLAUDE.md</code>.
+    </div>
+
+    <p><strong>Both tiers are active at the same time.</strong> Claude Code loads your personal instructions AND the project instructions AND any directory-level instructions. They stack, they don't override each other. Similarly, tools from both personal and project MCP servers are all available simultaneously.</p>
+  </div>
+
+  <div class="lesson" id="ch1-4">
+    <h3>Path-Scoped Rules and When You Need Them</h3>
+
+    <p>There's a fifth configuration location that deserves its own explanation: <code>.claude/rules/</code>.</p>
+
+    <p>Consider this situation: you want all test files to follow the same conventions. But test files are spread across your entire codebase &mdash; <code>src/components/Button.test.tsx</code>, <code>src/api/auth.test.ts</code>, <code>lib/utils.test.js</code>. You can't put a directory-level CLAUDE.md in every folder.</p>
+
+    <p>Path-scoped rules solve this. You create a file in <code>.claude/rules/</code> with a YAML frontmatter block that specifies glob patterns:</p>
+
+    <div class="codeblock"><span class="comment"># .claude/rules/testing.md</span>
+---
+paths: ["**/*.test.*", "**/*.spec.*"]
+---
+
+Use describe/it blocks for all tests.
+Mock external services, never internal modules.
+Each test file needs at least one integration test.</div>
+
+    <p>These rules <strong>only load when Claude is editing a file that matches the glob pattern</strong>. If you're editing <code>Button.tsx</code>, the testing rules don't load. If you're editing <code>Button.test.tsx</code>, they do.</p>
+
+    <h4>When to use which</h4>
+    <table>
+      <tr><th>Situation</th><th>Best mechanism</th></tr>
+      <tr><td>Standards that apply to all code in the project</td><td>Project-level <code>CLAUDE.md</code></td></tr>
+      <tr><td>Standards for one specific directory/package</td><td>Directory-level <code>CLAUDE.md</code> in that directory</td></tr>
+      <tr><td>Standards for a file type spread across many directories</td><td><code>.claude/rules/</code> with glob patterns</td></tr>
+    </table>
+
+    <p>There's also <code>@import</code> syntax for keeping CLAUDE.md modular &mdash; you can reference external files from within CLAUDE.md to avoid one massive file.</p>
+  </div>
+
+  <div class="lesson" id="ch1-5">
+    <h3>Skills and Their Frontmatter</h3>
+
+    <p>Skills are like advanced slash commands. They live in <code>.claude/skills/</code> (shared) or <code>~/.claude/skills/</code> (personal) and have a <code>SKILL.md</code> file.</p>
+
+    <p>What makes skills different from regular commands is the <strong>frontmatter</strong> &mdash; YAML configuration at the top of SKILL.md that controls how the skill executes:</p>
+
+    <div class="codeblock"><span class="comment"># .claude/skills/analyze-codebase/SKILL.md</span>
+---
+context: fork
+allowed-tools: ["Read", "Grep", "Glob"]
+argument-hint: "path to analyze"
+---
+
+Analyze the given directory for dead code, circular
+dependencies, and unused exports. Return a structured report.</div>
+
+    <p>The three frontmatter options and what they do:</p>
+
+    <table>
+      <tr><th>Option</th><th>What it does</th><th>When to use</th></tr>
+      <tr>
+        <td><code>context: fork</code></td>
+        <td>Runs the skill in an <strong>isolated sub-agent</strong>. All the skill's output &mdash; verbose file listings, dependency graphs, exploration notes &mdash; stays in the fork. Only the final result comes back to your main conversation.</td>
+        <td>Any skill that produces a lot of intermediate output you don't want cluttering your session.</td>
+      </tr>
+      <tr>
+        <td><code>allowed-tools</code></td>
+        <td>Restricts which tools the skill can use. Acts as a safety boundary.</td>
+        <td>When a skill should only read (not write), or shouldn't execute shell commands.</td>
+      </tr>
+      <tr>
+        <td><code>argument-hint</code></td>
+        <td>Shows a prompt to the user when they invoke the skill without arguments.</td>
+        <td>When the skill needs input (a file path, a feature name, etc).</td>
+      </tr>
+    </table>
+
+    <div class="note key">
+      <div class="note-label">Key Concept: context: fork</div>
+      This is the answer whenever the exam describes verbose or exploratory output that shouldn't pollute the main conversation. Not "write to a file." Not "summarize before returning." The purpose-built mechanism is <code>context: fork</code>.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch1-6">
+    <h3>Running Claude Code in CI/CD</h3>
+
+    <p>By default, Claude Code is interactive &mdash; it waits for user input in a terminal. In a CI/CD pipeline (GitHub Actions, Jenkins, etc.), there's no user. The job hangs.</p>
+
+    <p>The solution is one flag: <code>-p</code> (or <code>--print</code>).</p>
+
+    <div class="codeblock"><span class="comment"># This hangs in CI (waits for interactive input):</span>
+claude "Review this PR for security issues"
+
+<span class="comment"># This works (processes and exits):</span>
+<span class="highlight">claude -p "Review this PR for security issues"</span>
+
+<span class="comment"># For structured output that machines can parse:</span>
+<span class="highlight">claude -p --output-format json "Review this PR"</span>
+
+<span class="comment"># For a specific JSON shape:</span>
+<span class="highlight">claude -p --output-format json --json-schema schema.json "Review this PR"</span></div>
+
+    <p>There are only three CI-relevant flags. Everything else you might see on the exam (<code>CLAUDE_HEADLESS=true</code>, <code>--batch</code>, redirecting stdin) are fabricated distractors that don't exist.</p>
+
+    <table>
+      <tr><th>Flag</th><th>Purpose</th></tr>
+      <tr><td><code>-p</code> / <code>--print</code></td><td>Non-interactive mode. Process, output, exit.</td></tr>
+      <tr><td><code>--output-format json</code></td><td>Output as JSON instead of plain text.</td></tr>
+      <tr><td><code>--json-schema</code></td><td>Enforce a specific JSON structure on the output.</td></tr>
+    </table>
+
+    <div class="note build">
+      <div class="note-label">Building On This</div>
+      CI context also matters for review quality. A Claude session that generated code is less effective at reviewing its own changes &mdash; it retains its reasoning context and is less likely to question its own decisions. A separate, independent review instance is more effective. This connects to Domain 4's multi-pass review concepts.
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- CHAPTER 2: Structured Output -->
+<!-- ============================================================ -->
+<div class="chapter" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-label ch2">Chapter 02</div>
+    <h2>Getting Structured Data Out of Claude</h2>
+    <p>Claude's natural output is text. But production systems need JSON, validated fields, and guaranteed schemas. This chapter explains how to bridge that gap reliably.</p>
+  </div>
+
+  <div class="lesson" id="ch2-1">
+    <h3>Why Text Output Breaks in Production</h3>
+
+    <p>If you ask Claude to "return JSON," it usually will. But "usually" isn't good enough for a production pipeline that processes thousands of documents. Here's what goes wrong:</p>
+
+    <ul>
+      <li><strong>Syntax errors:</strong> Missing commas, unclosed brackets, trailing commas. Happens rarely, but at scale "rarely" means daily.</li>
+      <li><strong>Format drift:</strong> The model wraps JSON in markdown code fences, or adds explanatory text before/after the JSON.</li>
+      <li><strong>Schema violations:</strong> Missing required fields, wrong types, extra fields you didn't ask for.</li>
+    </ul>
+
+    <p>You could try to fix these with workarounds: tell the prompt "return only JSON, no markdown," use regex to extract JSON blocks, or run a JSON repair library. These all treat symptoms. The exam consistently favors the approach that makes the problem structurally impossible.</p>
+  </div>
+
+  <div class="lesson" id="ch2-2">
+    <h3>tool_use as a Structured Output Mechanism</h3>
+
+    <p>Here is the core insight: Claude's <strong>tool use</strong> feature was designed to call external functions, but it also serves as a structured output mechanism. When Claude calls a tool, it must produce JSON that exactly matches the tool's input schema. This is enforced at the system level &mdash; not by the prompt.</p>
+
+    <p>The pattern works like this:</p>
+
+    <div class="diagram">
+      <div class="diagram-title">Using tool_use for structured extraction</div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-label">Step 1</div>
+          <div class="flow-box a">Define a "tool" whose input schema IS your desired output format. The tool doesn't need to do anything &mdash; you just want the structured data.</div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-label">Step 2</div>
+          <div class="flow-box b">Send your document/data to Claude along with the tool definition. Configure <code>tool_choice</code> to force the model to call the tool.</div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-label">Step 3</div>
+          <div class="flow-box e">Read the structured data from the <code>tool_use</code> content block in the response. It's guaranteed to be valid JSON matching your schema.</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Example: you want to extract invoice data. You define a tool called <code>extract_invoice</code> with an input schema containing fields like <code>vendor_name</code>, <code>total_amount</code>, <code>line_items</code>. When Claude "calls" this tool, it produces the extracted data as the tool's arguments &mdash; guaranteed to match your schema.</p>
+
+    <div class="codeblock"><span class="comment">// Simplified example</span>
+tools: [{
+  name: "extract_invoice",
+  description: "Extract structured data from an invoice",
+  input_schema: {
+    type: "object",
+    properties: {
+      vendor_name: { type: "string" },
+      total_amount: { type: "number" },
+      line_items: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            description: { type: "string" },
+            amount: { type: "number" }
+          }
+        }
+      }
+    },
+    required: ["vendor_name", "total_amount", "line_items"]
+  }
+}]</div>
+
+    <div class="note key">
+      <div class="note-label">Key Distinction</div>
+      <code>tool_use</code> eliminates <strong>syntax errors</strong> (malformed JSON). It does NOT prevent <strong>semantic errors</strong> (line items that don't sum to the total, values in wrong fields). For semantic validation, you still need a validation layer.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch2-3">
+    <h3>Controlling When the Model Calls Tools</h3>
+
+    <p>The <code>tool_choice</code> parameter controls whether and which tools the model calls:</p>
+
+    <table>
+      <tr><th>Setting</th><th>Behavior</th><th>When to use</th></tr>
+      <tr>
+        <td><code>"auto"</code></td>
+        <td>Model decides whether to call a tool or return text.</td>
+        <td>Normal agent operation. No guarantee of structured output.</td>
+      </tr>
+      <tr>
+        <td><code>"any"</code></td>
+        <td>Model <strong>must</strong> call a tool, but chooses which one.</td>
+        <td>Multiple extraction schemas; document type is unknown. Guarantees structured output.</td>
+      </tr>
+      <tr>
+        <td><code>{"type":"tool", "name":"extract_invoice"}</code></td>
+        <td>Model <strong>must</strong> call this specific tool.</td>
+        <td>You know exactly what extraction to run. Maximum control.</td>
+      </tr>
+    </table>
+
+    <p>For extraction pipelines where you always want structured output, use <code>"any"</code> or forced selection. <code>"auto"</code> lets the model return plain text instead, which defeats the purpose.</p>
+  </div>
+
+  <div class="lesson" id="ch2-4">
+    <h3>Designing Schemas That Prevent Hallucination</h3>
+
+    <p>Schema design directly affects extraction quality. A poorly designed schema forces the model into hallucination.</p>
+
+    <p><strong>The problem with all-required schemas:</strong> If your schema says <code>fax_number</code> is required, but the source document has no fax number, the model is trapped. It must produce a value to satisfy the schema, so it fabricates one. This isn't a prompt problem &mdash; it's a schema design problem.</p>
+
+    <p><strong>The fix:</strong> Make fields nullable (optional) when the information might not exist in the source:</p>
+
+    <div class="codeblock">properties: {
+  vendor_name: { type: "string" },       <span class="comment">// Always on invoices</span>
+  total_amount: { type: "number" },       <span class="comment">// Always on invoices</span>
+  fax_number: {
+    type: ["string", "null"]              <span class="comment">// May not exist</span>
+  },
+  purchase_order: {
+    type: ["string", "null"]              <span class="comment">// May not exist</span>
+  }
+}
+required: ["vendor_name", "total_amount"] <span class="comment">// Only truly required fields</span></div>
+
+    <p>Now the model can return <code>null</code> for fax_number without penalty. No fabrication needed.</p>
+
+    <h4>Other schema design patterns</h4>
+
+    <table>
+      <tr><th>Situation</th><th>Pattern</th></tr>
+      <tr>
+        <td>Categories where the source is ambiguous</td>
+        <td>Add <code>"unclear"</code> to enum values</td>
+      </tr>
+      <tr>
+        <td>Categories that might not be in your predefined list</td>
+        <td>Add <code>"other"</code> enum value + a <code>detail</code> string field</td>
+      </tr>
+      <tr>
+        <td>Cross-validation between fields</td>
+        <td>Add both <code>stated_total</code> and <code>calculated_total</code>; compare downstream</td>
+      </tr>
+      <tr>
+        <td>Conflicting data in source</td>
+        <td>Add a <code>conflict_detected</code> boolean field</td>
+      </tr>
+    </table>
+
+    <div class="note think">
+      <div class="note-label">Think About It</div>
+      The exam tests this principle: prompt instructions ("don't fabricate") are weaker than schema design (nullable fields). The model can ignore a prompt instruction. It cannot ignore a schema that allows null &mdash; returning null becomes the easy, natural choice when information is absent.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch2-5">
+    <h3>When Extraction Fails: Validation and Retry</h3>
+
+    <p>Even with tool_use, extractions can be semantically wrong (wrong values, misplaced data). The standard pattern is <strong>retry with error feedback</strong>:</p>
+
+    <div class="diagram">
+      <div class="diagram-title">Validation-Retry Loop</div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-label">Extract</div>
+          <div class="flow-box a">Send document + tool definition to Claude. Get structured output.</div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-label">Validate</div>
+          <div class="flow-box b">Run semantic checks: do line items sum to total? Are dates valid? Are required fields non-null?</div>
+        </div>
+        <div class="flow-arrow">&darr; (if validation fails)</div>
+        <div class="flow-row">
+          <div class="flow-label">Retry</div>
+          <div class="flow-box c">Send the original document + the failed extraction + <strong>specific validation errors</strong> back to Claude.</div>
+        </div>
+      </div>
+    </div>
+
+    <p>The key detail: include the <strong>specific validation errors</strong> in the retry, not just "try again." This guides the model toward the exact problem.</p>
+
+    <p>But retries have limits. They work for:</p>
+    <ul>
+      <li>Format mismatches (model put the date in the wrong field)</li>
+      <li>Structural errors (missed a nested object)</li>
+      <li>Arithmetic issues (sum doesn't match)</li>
+    </ul>
+
+    <p>They do NOT work when the information simply isn't in the document. No amount of retrying will extract a fax number from a document that doesn't have one. Recognize the difference.</p>
+  </div>
+
+  <div class="lesson" id="ch2-6">
+    <h3>The Batch API and Its Constraints</h3>
+
+    <p>The Message Batches API lets you send many requests at once for 50% less cost. But it has hard constraints that determine when you can and can't use it.</p>
+
+    <h4>How it works</h4>
+    <p>You submit a batch of requests, each with a <code>custom_id</code>. The API processes them and returns results, which you match back using the same <code>custom_id</code>. Processing can take up to 24 hours &mdash; there is no guaranteed latency.</p>
+
+    <h4>The critical limitation</h4>
+    <p>The Batch API does not support multi-turn tool calling within a single request. In a normal synchronous call, the model can call a tool, get the result, reason about it, call another tool, and so on. In a batch request, the model processes the input and returns output &mdash; no mid-request tool execution.</p>
+
+    <p>This means:</p>
+
+    <table>
+      <tr><th>Workflow</th><th>Can use Batch?</th><th>Why</th></tr>
+      <tr>
+        <td>Extract data from 500 invoices</td>
+        <td>Yes</td>
+        <td>Each invoice is a single input &rarr; single output. No tool calling needed.</td>
+      </tr>
+      <tr>
+        <td>Weekly technical debt report</td>
+        <td>Depends</td>
+        <td>If it's single-turn (all code provided in prompt), yes. If it needs to read files iteratively, no.</td>
+      </tr>
+      <tr>
+        <td>Pre-merge code review (blocking)</td>
+        <td>No</td>
+        <td>Developers wait for results. Up to 24h latency is unacceptable for blocking workflows.</td>
+      </tr>
+      <tr>
+        <td>Agent that reads files, then decides what to analyze next</td>
+        <td>No</td>
+        <td>Requires multi-turn tool calling. Must use synchronous API.</td>
+      </tr>
+    </table>
+
+    <div class="note key">
+      <div class="note-label">Decision Rule</div>
+      Two questions determine if Batch API is appropriate:<br>
+      <strong>1. Can the workflow tolerate up to 24 hours of latency?</strong> If no &rarr; synchronous.<br>
+      <strong>2. Does the model need to act on tool results mid-request?</strong> If yes &rarr; synchronous.<br>
+      Both must be "yes/no" for batch to work.
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- CHAPTER 3: Tool Design & Distribution -->
+<!-- ============================================================ -->
+<div class="chapter" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-label ch3">Chapter 03</div>
+    <h2>Designing Tools and Distributing Them</h2>
+    <p>Tools are how Claude interacts with external systems. How you design and distribute them directly affects whether the agent uses them correctly.</p>
+  </div>
+
+  <div class="lesson" id="ch3-1">
+    <h3>How Claude Chooses Which Tool to Call</h3>
+
+    <p>When Claude has access to tools, it reads their <strong>names</strong> and <strong>descriptions</strong> to decide which one to use. This is the entire selection mechanism. There is no routing classifier, no keyword matching &mdash; just the model reading descriptions and making a judgment call.</p>
+
+    <p>This means tool descriptions are the single most important factor in tool selection reliability. A tool with a vague or minimal description will be misused. A tool with a clear, detailed description will be used correctly.</p>
+  </div>
+
+  <div class="lesson" id="ch3-2">
+    <h3>Writing Descriptions That Work</h3>
+
+    <p>A minimal description:</p>
+    <div class="codeblock"><span class="comment">// Bad: minimal, ambiguous</span>
+{ name: "get_customer", description: "Retrieves customer information" }
+{ name: "lookup_order", description: "Retrieves order details" }</div>
+
+    <p>Both "retrieve information." If a user says "check my order #12345," the model might call either one. A good description includes:</p>
+
+    <ul>
+      <li><strong>What it does</strong> specifically</li>
+      <li><strong>What inputs</strong> it accepts (formats, examples)</li>
+      <li><strong>When to use it</strong> vs similar tools</li>
+      <li><strong>What it returns</strong></li>
+    </ul>
+
+    <div class="codeblock"><span class="comment">// Good: clear boundaries</span>
+{
+  name: "get_customer",
+  description: "Look up a customer account by email address or
+    phone number. Returns customer profile: name, account status,
+    loyalty tier, contact info. Use this when you need to identify
+    or verify a customer. Do NOT use for order-related queries."
+}
+{
+  name: "lookup_order",
+  description: "Look up order details by order ID (format: #12345)
+    or tracking number. Returns: items, status, shipping info,
+    payment. Use this when the customer asks about a specific
+    order. Requires an order ID or tracking number."
+}</div>
+
+    <p>When tools have overlapping names (like <code>analyze_content</code> vs <code>analyze_document</code>), rename them to make the purpose obvious from the name alone: <code>extract_web_results</code> vs <code>summarize_pdf</code>.</p>
+  </div>
+
+  <div class="lesson" id="ch3-3">
+    <h3>The Tool Count Problem</h3>
+
+    <p>There's a practical limit to how many tools an agent can handle effectively. The research and exam agree: <strong>4-5 tools per agent</strong> is the sweet spot. At 18 tools, selection reliability degrades significantly.</p>
+
+    <p>Why? Each additional tool is another option the model must evaluate and distinguish. With 18 tools, especially if several have similar purposes, the decision space becomes too complex.</p>
+
+    <h4>The solution: distribute tools across specialized agents</h4>
+
+    <p>Instead of one agent with 18 tools, create multiple agents with focused tool sets:</p>
+
+    <div class="diagram">
+      <div class="diagram-title">Tool Distribution Pattern</div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-box d" style="text-align:center"><strong>Coordinator</strong><br>Tools: Task (spawn subagents)</div>
+        </div>
+        <div class="flow-arrow">&darr; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;</div>
+        <div class="flow-row" style="gap:0.5rem">
+          <div class="flow-box a" style="text-align:center;font-size:0.82rem"><strong>Search Agent</strong><br>3 tools</div>
+          <div class="flow-box b" style="text-align:center;font-size:0.82rem"><strong>Analysis Agent</strong><br>4 tools</div>
+          <div class="flow-box e" style="text-align:center;font-size:0.82rem"><strong>Synthesis Agent</strong><br>3 tools + verify_fact</div>
+        </div>
+      </div>
+    </div>
+
+    <p>Each agent gets only tools relevant to its role. This prevents cross-specialization misuse (e.g., a synthesis agent doing bad web searches when it should be synthesizing).</p>
+
+    <p>For high-frequency cross-role needs, you can give an agent a <strong>scoped tool</strong>. For example, the synthesis agent might get a <code>verify_fact</code> tool for quick lookups, while complex searches still route through the coordinator to the search agent.</p>
+
+    <div class="note key">
+      <div class="note-label">Exam Principle</div>
+      The exam favors reducing tool count over adding prompt instructions. If an agent misselects tools, the structural fix is fewer, better-described tools &mdash; not more few-shot examples on top of 18 confusing tools.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch3-4">
+    <h3>MCP Servers: Where Configuration Lives</h3>
+
+    <p>MCP (Model Context Protocol) servers are external tool providers. They expose tools and resources that Claude can use. Configuration is covered in Chapter 1, but here are the details that matter for tool design:</p>
+
+    <ul>
+      <li><strong>Project-level</strong> (<code>.mcp.json</code>): Shared via version control. Use <code>${ENV_VAR}</code> for secrets so tokens stay local.</li>
+      <li><strong>User-level</strong> (<code>~/.claude.json</code>): Personal/experimental servers.</li>
+      <li>Tools from all configured servers are discovered at connection time and available simultaneously.</li>
+    </ul>
+
+    <p><strong>MCP resources</strong> are a separate concept from tools. Resources are content catalogs (issue summaries, doc hierarchies, database schemas) that give Claude visibility into available data without requiring exploratory tool calls. Think of resources as "what's available" and tools as "how to act."</p>
+
+    <p>When choosing whether to build a custom MCP server or use an existing one: prefer community/existing servers for standard integrations (GitHub, Jira). Build custom servers only for team-specific workflows.</p>
+  </div>
+
+  <div class="lesson" id="ch3-5">
+    <h3>Structured Errors for Intelligent Recovery</h3>
+
+    <p>When a tool fails, the error response determines whether the agent can recover intelligently or is stuck guessing. A generic error like <code>"Operation failed"</code> tells the agent nothing.</p>
+
+    <p>Structured error responses include:</p>
+
+    <table>
+      <tr><th>Field</th><th>Purpose</th><th>Example</th></tr>
+      <tr>
+        <td><code>errorCategory</code></td>
+        <td>Type of failure</td>
+        <td><code>"transient"</code>, <code>"validation"</code>, <code>"permission"</code>, <code>"business"</code></td>
+      </tr>
+      <tr>
+        <td><code>isRetryable</code></td>
+        <td>Should the agent try again?</td>
+        <td><code>true</code> for timeouts, <code>false</code> for policy violations</td>
+      </tr>
+      <tr>
+        <td><code>description</code></td>
+        <td>Human-readable explanation</td>
+        <td><code>"Refund exceeds $500 policy limit"</code></td>
+      </tr>
+    </table>
+
+    <p>This lets the agent make appropriate decisions: retry transient errors, explain business errors to the user, and escalate permission errors.</p>
+
+    <p>Important distinction: an <strong>access failure</strong> (timeout, service down) is different from a <strong>valid empty result</strong> (query ran successfully, found no matches). Returning empty results as success when the service actually failed prevents any recovery.</p>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- CHAPTER 4: Context Management -->
+<!-- ============================================================ -->
+<div class="chapter" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-label ch4">Chapter 04</div>
+    <h2>Managing Context and Information</h2>
+    <p>Claude processes everything in a context window &mdash; a fixed amount of text it can "see" at once. Managing what's in that window, and what happens when sessions get long, is essential for reliable behavior.</p>
+  </div>
+
+  <div class="lesson" id="ch4-1">
+    <h3>Why Context Degrades in Long Sessions</h3>
+
+    <p>Two things happen as a conversation grows:</p>
+
+    <p><strong>1. Summarization loses details.</strong> When the context window fills up, older content gets summarized. Summaries preserve themes but lose specifics &mdash; exact dollar amounts become "a refund," specific dates become "recently," and order numbers disappear entirely.</p>
+
+    <p><strong>2. The "lost in the middle" effect.</strong> Models process information at the beginning and end of their context window more reliably than the middle. In a long document or conversation, findings from the middle may be overlooked.</p>
+
+    <p><strong>3. Tool results accumulate.</strong> Each tool call returns data that stays in context. A <code>get_customer</code> call might return 40+ fields when only 5 are relevant. After many calls, irrelevant data crowds out important information.</p>
+  </div>
+
+  <div class="lesson" id="ch4-2">
+    <h3>Session Management: Resume, Fresh Start, Fork</h3>
+
+    <p>Claude Code offers three ways to handle sessions across work periods:</p>
+
+    <h4>Resume (<code>--resume</code>)</h4>
+    <p>Continues a prior session. The full conversation history is available. Use this when the prior context is <strong>mostly still valid</strong> &mdash; you haven't made major changes to the code being discussed.</p>
+    <p>If specific files changed, you can inform the resumed session about just those changes rather than re-exploring everything.</p>
+
+    <h4>Fresh session with injected summary</h4>
+    <p>Start a brand new conversation, but include a structured summary of what you learned before. The model gets zero stale context &mdash; no outdated function signatures, no references to deleted files. Use this when <strong>significant code changes happened</strong> since the last session.</p>
+
+    <h4>Fork (<code>fork_session</code>)</h4>
+    <p>Creates independent branches from a shared analysis baseline. Both branches have the same history up to the fork point, then diverge. Use this to <strong>explore two different approaches</strong> from the same starting analysis (e.g., comparing testing strategies or refactoring approaches).</p>
+
+    <div class="note key">
+      <div class="note-label">Decision Rule</div>
+      <p><strong>Prior context mostly valid</strong> &rarr; <code>--resume</code></p>
+      <p><strong>Code changed significantly</strong> &rarr; new session + summary</p>
+      <p><strong>Want to compare approaches</strong> &rarr; <code>fork_session</code></p>
+      <p><strong>Context window filling during active work</strong> &rarr; <code>/compact</code></p>
+      <p><code>/compact</code> compresses the current session to free up space. It's for managing size during active work, not for fixing stale data. Stale data stays stale even after compaction.</p>
+    </div>
+  </div>
+
+  <div class="lesson" id="ch4-3">
+    <h3>Preserving Facts Across Summarization</h3>
+
+    <p>The core problem: a customer support session involves three issues with specific dollar amounts, order numbers, and dates. As the conversation grows and gets summarized, "$47.99 on order #8823" becomes "the billing issue" and the agent starts confusing it with the $23.50 credit on a different order.</p>
+
+    <p>The solution is to <strong>separate facts from conversation</strong>. Extract critical structured data into a persistent "case facts" block that lives outside the summarized history:</p>
+
+    <div class="codeblock"><span class="comment">// Case facts block (persisted in every prompt)</span>
+CASE FACTS:
+- Issue 1: Missing item on order #8823, credit requested: $23.50
+- Issue 2: Billing discrepancy on order #9102, overcharge: $47.99
+- Issue 3: Address update to 142 Oak Street
+- Customer: Jane Smith (ID: C-44821), loyalty: Gold tier</div>
+
+    <p>This block is included in every prompt, never summarized. The conversation history can be compressed freely because the critical facts are preserved separately.</p>
+
+    <p>Related techniques:</p>
+    <ul>
+      <li><strong>Trim tool outputs</strong> before they accumulate: keep only relevant fields from verbose API responses.</li>
+      <li><strong>Position key information at the start</strong> of long inputs to mitigate the "lost in the middle" effect.</li>
+      <li><strong>Scratchpad files</strong> for long exploration sessions: agents write findings to a file and reference it later, countering context degradation.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="ch4-4">
+    <h3>Provenance: Keeping Track of Where Things Came From</h3>
+
+    <p>In a multi-agent research system, information flows from source &rarr; search agent &rarr; analysis agent &rarr; synthesis agent &rarr; final report. At each step, attribution can be lost. "AI adoption is at 35%" means nothing without knowing who said it, when, and based on what.</p>
+
+    <h4>Claim-source mappings</h4>
+    <p>The foundational technique is requiring subagents to output <strong>structured claim-source pairs</strong>:</p>
+
+    <div class="codeblock">{
+  claim: "AI adoption in enterprises reached 35%",
+  source: "McKinsey Global Survey 2024",
+  url: "https://...",
+  publication_date: "2024-03-15",
+  methodology: "Survey of 1,200 enterprises globally"
+}</div>
+
+    <p>Downstream agents must preserve these mappings through synthesis, not compress them into unsourced statements.</p>
+
+    <h4>Handling conflicts</h4>
+    <p>When credible sources disagree (Source A says 35%, Source B says 52%), the synthesis agent's job is to <strong>faithfully represent the disagreement</strong>, not resolve it:</p>
+
+    <ul>
+      <li>Include both values with source attribution</li>
+      <li>Annotate why they might differ (different definitions, different time periods, different methodologies)</li>
+      <li>Structure the final report to distinguish well-established findings from contested ones</li>
+    </ul>
+
+    <p>The synthesis agent does NOT escalate conflicts to the coordinator (that's for errors and failures) and does NOT pick one source over another. Conflicting data is normal research output, not an error condition.</p>
+
+    <h4>Temporal data</h4>
+    <p>Requiring publication dates in structured outputs prevents temporal differences from being misinterpreted as contradictions. "35% in 2022" and "52% in 2024" aren't conflicting &mdash; they show growth.</p>
+
+    <div class="note build">
+      <div class="note-label">Connecting The Dots</div>
+      Provenance ties back to schema design from Chapter 2. The synthesis agent's output schema should have fields for source, date, and confidence &mdash; and these should be <strong>required</strong> fields (since sources should always be cited). Meanwhile, uncertain facts should use the patterns from Chapter 2: <code>"unclear"</code> enums, <code>conflict_detected</code> booleans, separate <code>stated_value</code> and <code>calculated_value</code> fields.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Summary -->
+<!-- ============================================================ -->
+<div class="chapter" id="summary">
+  <div class="chapter-header">
+    <div class="chapter-label" style="color: var(--accent);">Summary</div>
+    <h2>The Exam's Decision Framework</h2>
+    <p>Across all domains, the exam applies a consistent philosophy. Understanding it helps even on questions you haven't studied.</p>
+  </div>
+
+  <div class="lesson">
+    <h3>The Solution Hierarchy</h3>
+    <p>When a question offers multiple solutions that could work, the exam ranks them by reliability:</p>
+
+    <div class="diagram">
+      <div class="diagram-title">Preferred &rarr; Last Resort</div>
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-box b" style="text-align:center">
+            <span class="tag structural">Structural</span><br>
+            Make the problem impossible by design.<br>
+            <em>tool_use schemas, nullable fields, tool reduction, fresh sessions</em>
+          </div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-box a" style="text-align:center">
+            <span class="tag programmatic">Programmatic</span><br>
+            Enforce rules with code guarantees.<br>
+            <em>Hooks, prerequisite gates, validation loops</em>
+          </div>
+        </div>
+        <div class="flow-arrow">&darr;</div>
+        <div class="flow-row">
+          <div class="flow-box c" style="text-align:center">
+            <span class="tag prompt">Prompt-Based</span><br>
+            Guide behavior probabilistically.<br>
+            <em>Few-shot examples, system prompt instructions, explicit criteria</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>Prompt-based solutions aren't wrong &mdash; they're the right answer when no structural or programmatic option exists. But when a structural option IS available, it always wins.</p>
+
+    <p>Practice applying this: for each exam question, categorize every option as structural, programmatic, or prompt-based. If there's a structural option, it's almost certainly correct.</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

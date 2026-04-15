@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Certified Architect – Foundations Practice Exam</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3340;
+    --text: #e2e4e9;
+    --text-dim: #8b8fa3;
+    --accent: #c4956a;
+    --accent-light: #dbb592;
+    --correct: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.08);
+    --wrong: #f87171;
+    --wrong-bg: rgba(248, 113, 113, 0.08);
+    --domain1: #7c9bf5;
+    --domain2: #b58bf5;
+    --domain3: #f5a35b;
+    --domain4: #5be0b5;
+    --domain5: #f57088;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .progress-bar-container {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .progress-track {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .progress-track-inner {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .domain-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .domain-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .domain-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .domain-1 .domain-badge { background: rgba(124,155,245,0.15); color: var(--domain1); }
+  .domain-2 .domain-badge { background: rgba(181,139,245,0.15); color: var(--domain2); }
+  .domain-3 .domain-badge { background: rgba(245,163,91,0.15); color: var(--domain3); }
+  .domain-4 .domain-badge { background: rgba(91,224,181,0.15); color: var(--domain4); }
+  .domain-5 .domain-badge { background: rgba(245,112,136,0.15); color: var(--domain5); }
+
+  .domain-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .domain-weight {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .scenario-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .question-card.answered {
+    border-color: var(--accent);
+  }
+
+  .question-number {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+
+  .question-text {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+  }
+
+  .question-text code {
+    background: var(--surface2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--accent-light);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .option:hover {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.04);
+  }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.08);
+  }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.2s ease;
+    margin-top: 1px;
+  }
+
+  .option.selected .option-letter {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .option-text { flex: 1; }
+
+  /* Results mode */
+  .option.correct-answer {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+
+  .option.correct-answer .option-letter {
+    border-color: var(--correct);
+    background: var(--correct);
+    color: var(--bg);
+  }
+
+  .option.wrong-answer {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+  }
+
+  .option.wrong-answer .option-letter {
+    border-color: var(--wrong);
+    background: var(--wrong);
+    color: var(--bg);
+  }
+
+  .explanation {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent);
+  }
+
+  .explanation.visible { display: block; }
+
+  .explanation strong {
+    color: var(--text);
+  }
+
+  /* Submit area */
+  .submit-area {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .submit-area p {
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 2.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+  }
+
+  .btn:hover { background: var(--accent-light); }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-left: 0.75rem;
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface);
+    border-color: var(--text-dim);
+  }
+
+  /* Results panel */
+  .results-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .results-panel.visible { display: block; }
+
+  .results-score {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .results-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 1.5rem;
+  }
+
+  .results-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .domain-score {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--surface2);
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .domain-score .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .domain-1 .dot { background: var(--domain1); }
+  .domain-2 .dot { background: var(--domain2); }
+  .domain-3 .dot { background: var(--domain3); }
+  .domain-4 .dot { background: var(--domain4); }
+  .domain-5 .dot { background: var(--domain5); }
+
+  .results-verdict {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .results-verdict.pass {
+    background: var(--correct-bg);
+    color: var(--correct);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+
+  .results-verdict.fail {
+    background: var(--wrong-bg);
+    color: var(--wrong);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+  }
+
+  .unanswered-warning {
+    display: none;
+    color: var(--wrong);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .unanswered-warning.visible { display: block; }
+
+  @media (max-width: 640px) {
+    .container { padding: 1rem 1rem 3rem; }
+    header h1 { font-size: 1.35rem; }
+    .question-card { padding: 1.25rem; }
+    .results-breakdown { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-container">
+  <div class="progress-info">
+    <span id="progress-text">0 of 20 answered</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-track-inner">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>Claude Certified Architect &ndash; Foundations</h1>
+    <p>Practice Exam &middot; 20 Questions &middot; Select your answers, then submit to see results</p>
+  </header>
+
+  <div id="results-panel" class="results-panel">
+    <div class="results-score" id="results-score">--</div>
+    <div class="results-label">out of 20 correct</div>
+    <div class="results-breakdown" id="results-breakdown"></div>
+    <div class="results-verdict" id="results-verdict"></div>
+  </div>
+
+  <!-- Domain 1 -->
+  <div class="domain-section domain-1">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 1</span>
+      <h2>Agentic Architecture &amp; Orchestration</h2>
+      <span class="domain-weight">27%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Customer Support Resolution Agent</div>
+
+    <div class="question-card" data-question="1" data-answer="B" data-domain="1">
+      <div class="question-number">Question 1</div>
+      <div class="question-text">Your agentic loop checks whether the assistant's response contains text to determine if the loop should terminate. In testing, the agent sometimes stops mid-task after producing a brief explanation before completing all necessary tool calls. What is the root cause?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The model's <code>max_tokens</code> is set too low, causing premature truncation.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Checking for assistant text content is an unreliable completion indicator &mdash; the model may produce text between tool calls without intending to end the loop.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">The system prompt doesn't explicitly instruct the model to complete all tool calls before responding.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">The agentic loop needs a minimum iteration count before it's allowed to terminate.</span></div>
+      </div>
+      <div class="explanation" data-exp="1"><strong>Answer: B.</strong> The exam guide lists "checking for assistant text content as a completion indicator" as an anti-pattern. The correct approach is to check <code>stop_reason</code>: continue when <code>"tool_use"</code>, terminate when <code>"end_turn"</code>. Models may produce intermediate text alongside tool calls.</div>
+    </div>
+
+    <div class="question-card" data-question="2" data-answer="C" data-domain="1">
+      <div class="question-number">Question 2</div>
+      <div class="question-text">Production data shows that in 8% of cases, your agent processes refunds without first verifying the customer's identity through <code>get_customer</code>. A senior engineer suggests strengthening the system prompt with "You MUST ALWAYS call get_customer before process_refund." What's the best approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The stronger system prompt wording is sufficient combined with few-shot examples showing the correct order.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Use <code>tool_choice</code> forced selection to always call <code>get_customer</code> first on every turn.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Implement a programmatic prerequisite that blocks <code>process_refund</code> until <code>get_customer</code> has returned a verified customer ID.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Deploy a routing classifier that parses user messages and pre-selects the appropriate tool sequence.</span></div>
+      </div>
+      <div class="explanation" data-exp="2"><strong>Answer: C.</strong> When deterministic compliance is required for critical business logic (like identity verification before financial operations), prompt instructions have a non-zero failure rate. Programmatic enforcement via hooks or prerequisite gates provides deterministic guarantees.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Multi-Agent Research System</div>
+
+    <div class="question-card" data-question="3" data-answer="B" data-domain="1">
+      <div class="question-number">Question 3</div>
+      <div class="question-text">Your coordinator agent sends each subagent a brief task description like "Research AI in healthcare." The subagents return shallow, generic results despite having good tools. What's the most likely cause?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The subagents need access to more tools to perform deeper research.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Subagents don't automatically inherit the coordinator's conversation history, so they lack context for targeted research.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">The coordinator should execute subagents sequentially so each builds on previous findings.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">The subagents' system prompts are too restrictive, limiting their exploration scope.</span></div>
+      </div>
+      <div class="explanation" data-exp="3"><strong>Answer: B.</strong> Subagents operate with isolated context &mdash; they do not inherit the coordinator's conversation history automatically. The coordinator must explicitly provide complete context, including findings from prior agents, research goals, and quality criteria in each subagent's prompt.</div>
+    </div>
+
+    <div class="question-card" data-question="4" data-answer="B" data-domain="1">
+      <div class="question-number">Question 4</div>
+      <div class="question-text">Your coordinator always invokes all 4 subagents (web search, document analysis, synthesis, report generation) for every query &mdash; even simple factual questions that only need a quick lookup. What's the best architectural change?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add a caching layer so subagents skip work if a similar query was recently processed.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Design the coordinator to analyze query requirements and dynamically select which subagents to invoke based on complexity.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Reduce the number of subagents to 2 by merging web search with document analysis, and synthesis with report generation.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Set time budgets per subagent so simple queries complete faster even when all agents run.</span></div>
+      </div>
+      <div class="explanation" data-exp="4"><strong>Answer: B.</strong> Coordinators should "dynamically select which subagents to invoke rather than always routing through the full pipeline." The coordinator assesses query complexity and only invokes the subagents actually needed.</div>
+    </div>
+
+    <div class="question-card" data-question="5" data-answer="C" data-domain="1">
+      <div class="question-number">Question 5</div>
+      <div class="question-text">You need to spawn three research subagents to investigate different subtopics simultaneously. Currently your coordinator emits one Task tool call per turn, waiting for each subagent to complete before spawning the next. How do you enable parallel execution?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Configure the subagents with <code>async: true</code> in their AgentDefinition so they run in the background.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Create a parallel execution middleware that intercepts Task calls and batches them.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Have the coordinator emit multiple Task tool calls in a single response rather than across separate turns.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Use <code>fork_session</code> to create three parallel branches from the coordinator's context.</span></div>
+      </div>
+      <div class="explanation" data-exp="5"><strong>Answer: C.</strong> The exam guide specifies "spawning parallel subagents by emitting multiple Task tool calls in a single coordinator response rather than across separate turns." This is the documented mechanism for parallel subagent execution.</div>
+    </div>
+
+    <div class="question-card" data-question="6" data-answer="A" data-domain="1">
+      <div class="question-number">Question 6</div>
+      <div class="question-text">You resumed a long investigation session after making significant code changes overnight. The agent now gives contradictory answers &mdash; referencing function signatures that no longer exist. What's the best approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Start a new session with a structured summary of prior findings rather than resuming with stale tool results.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Use <code>/compact</code> to reduce context and force the agent to re-read files.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add a system prompt instruction reminding the agent that code may have changed since last session.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Resume the session and re-read all previously analyzed files to refresh the context.</span></div>
+      </div>
+      <div class="explanation" data-exp="6"><strong>Answer: A.</strong> The exam guide states: "Starting a new session with a structured summary is more reliable than resuming with stale tool results." When prior tool results are stale due to significant code changes, a fresh session with injected summaries prevents the model from reasoning over outdated information.</div>
+    </div>
+
+  </div>
+
+  <!-- Domain 2 -->
+  <div class="domain-section domain-2">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 2</span>
+      <h2>Tool Design &amp; MCP Integration</h2>
+      <span class="domain-weight">18%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Developer Productivity with Claude</div>
+
+    <div class="question-card" data-question="7" data-answer="B" data-domain="2">
+      <div class="question-number">Question 7</div>
+      <div class="question-text">Your agent has 18 tools available. Logs show it frequently selects the wrong tool, especially among tools with similar names like <code>analyze_content</code>, <code>analyze_document</code>, and <code>analyze_data</code>. What's the most effective fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add a routing classifier that pre-selects the correct tool before the agent runs.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Reduce the agent's tool set to 4&ndash;5 role-relevant tools and rename them to eliminate functional overlap.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add detailed few-shot examples for every tool showing when each should be used.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Group tools into categories and present only the relevant category based on the query.</span></div>
+      </div>
+      <div class="explanation" data-exp="7"><strong>Answer: B.</strong> Giving an agent too many tools (e.g., 18 instead of 4&ndash;5) degrades selection reliability. The fix is reducing tools per agent and renaming/differentiating descriptions to eliminate overlap.</div>
+    </div>
+
+    <div class="question-card" data-question="8" data-answer="B" data-domain="2">
+      <div class="question-number">Question 8</div>
+      <div class="question-text">Your MCP tool returns <code>{"status": "error", "message": "Operation failed"}</code> for all failure types &mdash; timeouts, invalid inputs, and policy violations alike. Why is this problematic?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The error format doesn't use the MCP <code>isError</code> flag, so the agent doesn't recognize it as an error.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Uniform error responses prevent the agent from distinguishing retryable from non-retryable errors, blocking appropriate recovery decisions.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">The message is too short for the model to understand the error context.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Error messages should include stack traces so the agent can debug the underlying issue.</span></div>
+      </div>
+      <div class="explanation" data-exp="8"><strong>Answer: B.</strong> The exam guide emphasizes returning structured error metadata including <code>errorCategory</code> (transient/validation/permission), <code>isRetryable</code> boolean, and human-readable descriptions. Generic errors hide whether the agent should retry, explain a policy violation, or escalate.</div>
+    </div>
+
+    <div class="question-card" data-question="9" data-answer="B" data-domain="2">
+      <div class="question-number">Question 9</div>
+      <div class="question-text">You need to configure a shared GitHub MCP server for your team and a personal experimental database explorer. Where should each be placed?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Both in <code>.mcp.json</code> &mdash; team servers in one section, personal in another.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Shared server in <code>.mcp.json</code> (project-scoped); personal server in <code>~/.claude.json</code> (user-scoped).</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Shared server in <code>CLAUDE.md</code> with connection instructions; personal server in <code>~/.claude/CLAUDE.md</code>.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Both in <code>~/.claude.json</code> since MCP servers need API tokens that shouldn't be committed.</span></div>
+      </div>
+      <div class="explanation" data-exp="9"><strong>Answer: B.</strong> <code>.mcp.json</code> is for project-level shared team tooling (version-controlled), <code>~/.claude.json</code> is for user-level personal/experimental servers. Environment variable expansion (<code>${GITHUB_TOKEN}</code>) handles credentials without committing secrets.</div>
+    </div>
+
+    <div class="question-card" data-question="10" data-answer="B" data-domain="2">
+      <div class="question-number">Question 10</div>
+      <div class="question-text">Your synthesis agent sometimes uses the web search tool to look things up instead of routing through the coordinator, producing poor results because web search is outside its specialization. What's the best approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add a prompt instruction telling the synthesis agent not to use the web search tool.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Restrict the synthesis agent's tool set to only synthesis-relevant tools, optionally providing a scoped <code>verify_fact</code> tool for simple lookups.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Remove the web search tool from all agents and only allow the coordinator to perform searches.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Log all tool usage and add a post-processing step that flags cross-specialization tool use.</span></div>
+      </div>
+      <div class="explanation" data-exp="10"><strong>Answer: B.</strong> Restrict each subagent's tool set to those relevant to its role, preventing cross-specialization misuse. Provide scoped cross-role tools for high-frequency needs (e.g., a <code>verify_fact</code> tool) while routing complex cases through the coordinator.</div>
+    </div>
+  </div>
+
+  <!-- Domain 3 -->
+  <div class="domain-section domain-3">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 3</span>
+      <h2>Claude Code Configuration &amp; Workflows</h2>
+      <span class="domain-weight">20%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Code Generation with Claude Code</div>
+
+    <div class="question-card" data-question="11" data-answer="B" data-domain="3">
+      <div class="question-number">Question 11</div>
+      <div class="question-text">A new developer joins your team and reports that Claude Code isn't following the team's coding standards. Other developers don't have this issue. Investigation reveals the standards are configured in <code>~/.claude/CLAUDE.md</code> on existing developers' machines. What's wrong?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The new developer's Claude Code installation is outdated and doesn't support user-level config.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">User-level <code>~/.claude/CLAUDE.md</code> is personal and not shared via version control. Move instructions to project-level <code>.claude/CLAUDE.md</code>.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">The new developer needs to run <code>/memory</code> to manually load the configuration.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">User-level CLAUDE.md files only activate after the first completed session.</span></div>
+      </div>
+      <div class="explanation" data-exp="11"><strong>Answer: B.</strong> User-level settings apply only to that user &mdash; instructions in <code>~/.claude/CLAUDE.md</code> are not shared with teammates via version control. Project-level <code>.claude/CLAUDE.md</code> or root <code>CLAUDE.md</code> should be used for team-wide standards.</div>
+    </div>
+
+    <div class="question-card" data-question="12" data-answer="B" data-domain="3">
+      <div class="question-number">Question 12</div>
+      <div class="question-text">Your codebase has test files spread throughout many directories (e.g., <code>Button.test.tsx</code> next to <code>Button.tsx</code>). You want all tests to follow the same conventions regardless of location. What's the most maintainable approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Place a <code>CLAUDE.md</code> file in every directory that contains test files.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Create a <code>.claude/rules/testing.md</code> file with YAML frontmatter <code>paths: ["**/*.test.*"]</code> containing your test conventions.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add all test conventions to the root <code>CLAUDE.md</code> under a "Testing" header.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Create a skill in <code>.claude/skills/</code> that developers invoke before writing tests.</span></div>
+      </div>
+      <div class="explanation" data-exp="12"><strong>Answer: B.</strong> Path-specific rules with glob patterns in <code>.claude/rules/</code> apply conventions based on file paths regardless of directory. Option A is impractical. Option C relies on inference. Option D requires manual invocation instead of automatic application.</div>
+    </div>
+
+    <div class="question-card" data-question="13" data-answer="B" data-domain="3">
+      <div class="question-number">Question 13</div>
+      <div class="question-text">You're creating a codebase analysis skill that produces hundreds of lines of verbose output (file listings, dependency graphs, dead code analysis). How should you prevent this from polluting the main conversation?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add instructions in the skill to summarize its own output to under 50 lines before returning.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Add <code>context: fork</code> to the SKILL.md frontmatter so it runs in an isolated sub-agent context.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Write the output to a temporary file and return just the file path.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Set <code>max_tokens: 200</code> in the skill frontmatter to limit output length.</span></div>
+      </div>
+      <div class="explanation" data-exp="13"><strong>Answer: B.</strong> The <code>context: fork</code> frontmatter option runs skills in an isolated sub-agent context, preventing verbose or exploratory output from polluting the main conversation context.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Claude Code for Continuous Integration</div>
+
+    <div class="question-card" data-question="14" data-answer="A" data-domain="3">
+      <div class="question-number">Question 14</div>
+      <div class="question-text">Your CI pipeline runs <code>claude "Review this PR for issues"</code> but the job hangs indefinitely. Logs show Claude Code is waiting for interactive input. What's the fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use the <code>-p</code> flag: <code>claude -p "Review this PR for issues"</code></span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Set the environment variable <code>CLAUDE_HEADLESS=true</code> before running the command.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Redirect stdin from <code>/dev/null</code>: <code>claude "Review this PR" &lt; /dev/null</code></span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Use the <code>--batch</code> flag: <code>claude --batch "Review this PR for issues"</code></span></div>
+      </div>
+      <div class="explanation" data-exp="14"><strong>Answer: A.</strong> The <code>-p</code> (or <code>--print</code>) flag runs Claude Code in non-interactive mode. It processes the prompt, outputs the result to stdout, and exits. The other options reference non-existent features or workarounds that don't properly address Claude Code's interface.</div>
+    </div>
+
+  </div>
+
+  <!-- Domain 4 -->
+  <div class="domain-section domain-4">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 4</span>
+      <h2>Prompt Engineering &amp; Structured Output</h2>
+      <span class="domain-weight">20%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Claude Code for Continuous Integration</div>
+
+    <div class="question-card" data-question="15" data-answer="B" data-domain="4">
+      <div class="question-number">Question 15</div>
+      <div class="question-text">Your CI-based code review flags "misleading comments" but 70% of these findings are false positives. Developers have stopped reading the review output entirely. What's the most effective fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add "be conservative and only report high-confidence findings" to the review prompt.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Temporarily disable the misleading comments category to restore trust, while rewriting the prompt with specific criteria defining what constitutes a misleading comment.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Set temperature to 0 for more deterministic, consistent review output.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Add a second Claude instance to filter out low-confidence findings before posting.</span></div>
+      </div>
+      <div class="explanation" data-exp="15"><strong>Answer: B.</strong> General instructions like "be conservative" fail to improve precision compared to specific categorical criteria. The exam guide recommends temporarily disabling high false-positive categories to restore trust while rewriting the prompt with explicit, concrete criteria.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Structured Data Extraction</div>
+
+    <div class="question-card" data-question="16" data-answer="C" data-domain="4">
+      <div class="question-number">Question 16</div>
+      <div class="question-text">Your extraction pipeline parses JSON from <code>response.content[0].text</code>. It occasionally fails due to JSON syntax errors (missing commas, unclosed brackets). What's the most reliable fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add "Return valid JSON only, no markdown formatting" to the system prompt.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Use regex to extract the JSON block from the response text.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use <code>tool_use</code> with a JSON schema &mdash; structured output via tool use eliminates JSON syntax errors.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Implement a JSON repair library that fixes common syntax issues before parsing.</span></div>
+      </div>
+      <div class="explanation" data-exp="16"><strong>Answer: C.</strong> Tool use with JSON schemas is "the most reliable approach for guaranteed schema-compliant structured output, eliminating JSON syntax errors." This provides structural guarantees rather than probabilistic compliance.</div>
+    </div>
+
+    <div class="question-card" data-question="17" data-answer="B" data-domain="4">
+      <div class="question-number">Question 17</div>
+      <div class="question-text">Your extraction schema has all fields marked <code>required</code>. When processing invoices that lack a fax number field, the model fabricates plausible-looking fax numbers. How should you fix this?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add "Do not fabricate information. Leave fields blank if not found in the source document." to the prompt.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Make fields that may be absent in source documents <code>optional</code> (nullable) so the model can return <code>null</code>.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add a confidence score field and post-process to remove low-confidence extractions.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Add few-shot examples showing the model omitting fields not present in the document.</span></div>
+      </div>
+      <div class="explanation" data-exp="17"><strong>Answer: B.</strong> The exam guide specifies: "Designing schema fields as optional (nullable) when source documents may not contain the information, preventing the model from fabricating values to satisfy required fields."</div>
+    </div>
+
+    <div class="question-card" data-question="18" data-answer="A" data-domain="4">
+      <div class="question-number">Question 18</div>
+      <div class="question-text">Your overnight technical debt analysis could save 50% with the Message Batches API. However, the analysis uses multi-turn tool calling (the model reads a file, decides what to analyze next, reads more files). Can you use the Batches API for this workflow?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">No &mdash; the batch API does not support multi-turn tool calling within a single request. Restructure as single-turn prompts or keep synchronous calls.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Yes &mdash; batch processing supports tool calling with pre-computed tool results included in the request.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Yes &mdash; set up polling to feed tool results back into the batch job between turns.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Yes &mdash; chain multiple batch submissions where each submission handles one turn of tool calling.</span></div>
+      </div>
+      <div class="explanation" data-exp="18"><strong>Answer: A.</strong> The batch API "does not support multi-turn tool calling within a single request (cannot execute tools mid-request and return results)." The workflow must be restructured into single-turn prompts or kept as synchronous API calls.</div>
+    </div>
+  </div>
+
+  <!-- Domain 5 -->
+  <div class="domain-section domain-5">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 5</span>
+      <h2>Context Management &amp; Reliability</h2>
+      <span class="domain-weight">15%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Customer Support Resolution Agent</div>
+
+    <div class="question-card" data-question="19" data-answer="B" data-domain="5">
+      <div class="question-number">Question 19</div>
+      <div class="question-text">During a long support session involving 3 issues, the agent starts referring to "the refund" without specifying which order, and confuses the $47.99 billing discrepancy with the $23.50 missing item credit. What pattern best addresses this?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Increase <code>max_tokens</code> to preserve the full uncompressed conversation history.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Extract transactional facts (amounts, order numbers, statuses) into a persistent "case facts" block included in each prompt, outside summarized history.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Restart the conversation for each separate issue to prevent cross-contamination.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Enable extended thinking so the model can reason through the details more carefully.</span></div>
+      </div>
+      <div class="explanation" data-exp="19"><strong>Answer: B.</strong> The exam guide recommends extracting transactional facts into a persistent "case facts" block included in each prompt, outside summarized history. Progressive summarization risks condensing critical numerical values and dates into vague summaries.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Multi-Agent Research System</div>
+
+    <div class="question-card" data-question="20" data-answer="A" data-domain="5">
+      <div class="question-number">Question 20</div>
+      <div class="question-text">Your research system synthesizes findings from multiple sources. Two credible sources report conflicting statistics: one says "AI adoption is at 35%" and another says "AI adoption is at 52%." How should the synthesis agent handle this?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Include both values with source attribution and annotate the conflict, letting the report distinguish well-established from contested findings.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Average the two values and report 43.5% as a balanced estimate.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use the more recent source and discard the older statistic.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Escalate to the coordinator to decide which source is more authoritative.</span></div>
+      </div>
+      <div class="explanation" data-exp="20"><strong>Answer: A.</strong> The exam guide specifies: "Annotating conflicts with source attribution rather than arbitrarily selecting one value" and "structuring reports with explicit sections distinguishing well-established findings from contested ones."</div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area" id="submit-area">
+    <p id="unanswered-warning" class="unanswered-warning"></p>
+    <p>When you're ready, submit to reveal all answers and explanations.</p>
+    <button class="btn" id="submit-btn" onclick="submitExam()">Submit Exam</button>
+    <button class="btn btn-secondary" id="reset-btn" onclick="resetExam()" style="display:none;">Retake Exam</button>
+  </div>
+
+</div>
+
+<script>
+  const state = { answers: {}, submitted: false };
+  const totalQuestions = 20;
+
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if (state.submitted) return;
+      const card = this.closest('.question-card');
+      const qNum = card.dataset.question;
+      const choice = this.dataset.choice;
+
+      card.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+      card.classList.add('answered');
+      state.answers[qNum] = choice;
+      updateProgress();
+    });
+  });
+
+  function updateProgress() {
+    const count = Object.keys(state.answers).length;
+    const pct = Math.round((count / totalQuestions) * 100);
+    document.getElementById('progress-text').textContent = `${count} of ${totalQuestions} answered`;
+    document.getElementById('progress-pct').textContent = `${pct}%`;
+    document.getElementById('progress-fill').style.width = `${pct}%`;
+  }
+
+  function submitExam() {
+    const answered = Object.keys(state.answers).length;
+    const warning = document.getElementById('unanswered-warning');
+
+    if (answered < totalQuestions) {
+      const missing = totalQuestions - answered;
+      warning.textContent = `${missing} question${missing > 1 ? 's' : ''} unanswered. Unanswered questions count as incorrect. Submit anyway?`;
+      warning.classList.add('visible');
+
+      const btn = document.getElementById('submit-btn');
+      if (btn.dataset.confirmPending !== 'true') {
+        btn.dataset.confirmPending = 'true';
+        btn.textContent = 'Confirm Submit';
+        return;
+      }
+    }
+
+    state.submitted = true;
+
+    let correct = 0;
+    const domainCorrect = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    const domainTotal = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+
+    document.querySelectorAll('.question-card').forEach(card => {
+      const qNum = card.dataset.question;
+      const correctAns = card.dataset.answer;
+      const domain = card.dataset.domain;
+      const userAns = state.answers[qNum] || null;
+
+      domainTotal[domain]++;
+
+      card.querySelectorAll('.option').forEach(opt => {
+        opt.style.cursor = 'default';
+        if (opt.dataset.choice === correctAns) {
+          opt.classList.add('correct-answer');
+        }
+        if (userAns && opt.dataset.choice === userAns && userAns !== correctAns) {
+          opt.classList.add('wrong-answer');
+        }
+      });
+
+      if (userAns === correctAns) {
+        correct++;
+        domainCorrect[domain]++;
+      }
+
+      card.querySelector('.explanation').classList.add('visible');
+    });
+
+    // Show results panel
+    const panel = document.getElementById('results-panel');
+    panel.classList.add('visible');
+    document.getElementById('results-score').textContent = correct;
+
+    const domainNames = {
+      '1': 'Agentic Arch.',
+      '2': 'Tool Design',
+      '3': 'Claude Code',
+      '4': 'Prompt Eng.',
+      '5': 'Context Mgmt.'
+    };
+
+    const breakdown = document.getElementById('results-breakdown');
+    breakdown.innerHTML = '';
+    for (const d of ['1','2','3','4','5']) {
+      const el = document.createElement('div');
+      el.className = `domain-score domain-${d}`;
+      el.innerHTML = `<span class="dot"></span> ${domainNames[d]}: ${domainCorrect[d]}/${domainTotal[d]}`;
+      breakdown.appendChild(el);
+    }
+
+    const scaledScore = Math.round(100 + (correct / totalQuestions) * 900);
+    const verdict = document.getElementById('results-verdict');
+    if (scaledScore >= 720) {
+      verdict.className = 'results-verdict pass';
+      verdict.textContent = `Scaled score: ${scaledScore}/1000 — PASS (720 required)`;
+    } else {
+      verdict.className = 'results-verdict fail';
+      verdict.textContent = `Scaled score: ${scaledScore}/1000 — Below passing (720 required)`;
+    }
+
+    document.getElementById('submit-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-block';
+    document.querySelector('.submit-area p').style.display = 'none';
+    document.getElementById('unanswered-warning').classList.remove('visible');
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function resetExam() {
+    state.answers = {};
+    state.submitted = false;
+
+    document.querySelectorAll('.question-card').forEach(card => {
+      card.classList.remove('answered');
+      card.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected', 'correct-answer', 'wrong-answer');
+        opt.style.cursor = 'pointer';
+      });
+      card.querySelector('.explanation').classList.remove('visible');
+    });
+
+    document.getElementById('results-panel').classList.remove('visible');
+    document.getElementById('submit-btn').style.display = 'inline-block';
+    document.getElementById('submit-btn').textContent = 'Submit Exam';
+    document.getElementById('submit-btn').dataset.confirmPending = '';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.querySelector('.submit-area p').style.display = '';
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
