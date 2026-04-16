@@ -1,0 +1,17 @@
+# Anthropic "Need to Know" exam guide PDF — do not commit to public repo
+exam-guide.pdf
+instructor_*.pdf
+
+# Local tool state
+.claude/
+.playwright-mcp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*~
