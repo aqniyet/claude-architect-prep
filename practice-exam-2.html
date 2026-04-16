@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Certified Architect – Foundations Practice Exam 2</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3340;
+    --text: #e2e4e9;
+    --text-dim: #8b8fa3;
+    --accent: #c4956a;
+    --accent-light: #dbb592;
+    --correct: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.08);
+    --wrong: #f87171;
+    --wrong-bg: rgba(248, 113, 113, 0.08);
+    --domain1: #7c9bf5;
+    --domain2: #b58bf5;
+    --domain3: #f5a35b;
+    --domain4: #5be0b5;
+    --domain5: #f57088;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  .version-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.7rem;
+    background: rgba(196, 149, 106, 0.12);
+    color: var(--accent);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-bar-container {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .progress-track {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .progress-track-inner {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .domain-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .domain-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .domain-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .domain-1 .domain-badge { background: rgba(124,155,245,0.15); color: var(--domain1); }
+  .domain-2 .domain-badge { background: rgba(181,139,245,0.15); color: var(--domain2); }
+  .domain-3 .domain-badge { background: rgba(245,163,91,0.15); color: var(--domain3); }
+  .domain-4 .domain-badge { background: rgba(91,224,181,0.15); color: var(--domain4); }
+  .domain-5 .domain-badge { background: rgba(245,112,136,0.15); color: var(--domain5); }
+
+  .domain-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .domain-weight {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .scenario-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    padding-left: 0.25rem;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .question-card.answered {
+    border-color: var(--accent);
+  }
+
+  .question-number {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+
+  .question-text {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+  }
+
+  .question-text code {
+    background: var(--surface2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--accent-light);
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .option:hover {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.04);
+  }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.08);
+  }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.2s ease;
+    margin-top: 1px;
+  }
+
+  .option.selected .option-letter {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .option-text { flex: 1; }
+
+  .option.correct-answer {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+
+  .option.correct-answer .option-letter {
+    border-color: var(--correct);
+    background: var(--correct);
+    color: var(--bg);
+  }
+
+  .option.wrong-answer {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+  }
+
+  .option.wrong-answer .option-letter {
+    border-color: var(--wrong);
+    background: var(--wrong);
+    color: var(--bg);
+  }
+
+  .explanation {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent);
+  }
+
+  .explanation.visible { display: block; }
+
+  .explanation strong {
+    color: var(--text);
+  }
+
+  .submit-area {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .submit-area p {
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.85rem 2.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+    font-family: inherit;
+  }
+
+  .btn:hover { background: var(--accent-light); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-left: 0.75rem;
+  }
+
+  .btn-secondary:hover {
+    background: var(--surface);
+    border-color: var(--text-dim);
+  }
+
+  /* Results panel */
+  .results-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .results-panel.visible { display: block; }
+
+  .results-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .results-score {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .results-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 1.5rem;
+  }
+
+  .results-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .domain-score {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--surface2);
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .domain-score .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .domain-1 .dot { background: var(--domain1); }
+  .domain-2 .dot { background: var(--domain2); }
+  .domain-3 .dot { background: var(--domain3); }
+  .domain-4 .dot { background: var(--domain4); }
+  .domain-5 .dot { background: var(--domain5); }
+
+  .results-verdict {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .results-verdict.pass {
+    background: var(--correct-bg);
+    color: var(--correct);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+
+  .results-verdict.fail {
+    background: var(--wrong-bg);
+    color: var(--wrong);
+    border: 1px solid rgba(248, 113, 113, 0.2);
+  }
+
+  /* Export section */
+  .export-section {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .export-section h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .export-section > p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .export-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .export-btn {
+    padding: 0.5rem 1rem;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .export-btn:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .export-btn.copied {
+    background: var(--correct-bg);
+    color: var(--correct);
+    border-color: var(--correct);
+  }
+
+  .wrong-summary {
+    margin-top: 1.5rem;
+  }
+
+  .wrong-summary h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--wrong);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .wrong-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--surface2);
+    border-radius: 6px;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+    align-items: baseline;
+  }
+
+  .wrong-q {
+    font-weight: 700;
+    color: var(--wrong);
+    min-width: 40px;
+  }
+
+  .wrong-your {
+    color: var(--text-dim);
+  }
+
+  .wrong-correct {
+    color: var(--correct);
+    margin-left: auto;
+  }
+
+  .unanswered-warning {
+    display: none;
+    color: var(--wrong);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .unanswered-warning.visible { display: block; }
+
+  @media (max-width: 640px) {
+    .container { padding: 1rem 1rem 3rem; }
+    header h1 { font-size: 1.35rem; }
+    .question-card { padding: 1.25rem; }
+    .results-breakdown { flex-direction: column; align-items: center; }
+    .wrong-row { flex-wrap: wrap; }
+    .wrong-correct { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-container">
+  <div class="progress-info">
+    <span id="progress-text">0 of 20 answered</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-track-inner">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <div class="version-badge">Exam 2 &middot; Fresh Questions</div>
+    <h1>Claude Certified Architect &ndash; Foundations</h1>
+    <p>Practice Exam 2 &middot; 20 New Questions &middot; Results exportable at the end</p>
+  </header>
+
+  <div id="results-panel" class="results-panel">
+    <div class="results-header">
+      <div class="results-score" id="results-score">--</div>
+      <div class="results-label">out of 20 correct</div>
+      <div class="results-breakdown" id="results-breakdown"></div>
+      <div class="results-verdict" id="results-verdict"></div>
+    </div>
+
+    <div class="wrong-summary" id="wrong-summary"></div>
+
+    <div class="export-section">
+      <h3>Share Results</h3>
+      <p>Copy this summary to share with your study partner or Claude for targeted analysis.</p>
+      <div class="export-box" id="export-box"></div>
+      <div class="export-buttons">
+        <button class="export-btn" onclick="copyResults('compact')">
+          <span>Copy Compact</span>
+        </button>
+        <button class="export-btn" onclick="copyResults('detailed')">
+          <span>Copy Detailed</span>
+        </button>
+        <button class="export-btn" onclick="copyResults('json')">
+          <span>Copy JSON</span>
+        </button>
+        <button class="export-btn" onclick="downloadResults()">
+          <span>Download .txt</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain 1: Agentic Architecture (27%, 6 questions) -->
+  <div class="domain-section domain-1">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 1</span>
+      <h2>Agentic Architecture &amp; Orchestration</h2>
+      <span class="domain-weight">27%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Multi-Agent Research System</div>
+
+    <div class="question-card" data-question="1" data-answer="C" data-domain="1">
+      <div class="question-number">Question 1</div>
+      <div class="question-text">Your research coordinator delegates to web search, document analysis, and synthesis subagents sequentially &mdash; waiting for each to finish before spawning the next. A typical research task takes 180 seconds end-to-end. The subagents don't have dependencies between them; they just need the same query. What's the most effective optimization?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Increase the <code>max_tokens</code> on each subagent so they produce more comprehensive output in fewer iterations.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Combine the three subagents into a single agent with all tools available so only one Task call is needed.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Have the coordinator emit multiple Task tool calls in a single response to spawn the three subagents in parallel.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Cache subagent results so repeated queries skip the full execution path.</span></div>
+      </div>
+      <div class="explanation" data-exp="1"><strong>Answer: C.</strong> Parallel subagent execution is achieved by emitting multiple Task tool calls in a single coordinator response, not across separate turns. The three subagents run concurrently, dramatically reducing latency for independent work. Option B violates specialization and exceeds tool count limits.</div>
+    </div>
+
+    <div class="question-card" data-question="2" data-answer="B" data-domain="1">
+      <div class="question-number">Question 2</div>
+      <div class="question-text">A stakeholder complains that your research reports on broad topics (e.g., "impact of climate policy") consistently miss major subtopics. Examining logs, you see the coordinator decomposes tasks with prompts like "find climate papers" and "summarize climate news." The subagents execute correctly, but coverage is incomplete. Where should you focus your fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">The synthesis agent &mdash; add instructions for it to identify and flag coverage gaps.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">The coordinator &mdash; its task decomposition is too narrow, creating subagent assignments that don't cover all relevant dimensions of the topic.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">The web search agent &mdash; its queries are too generic and need domain-specific expansion.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">The document analysis agent &mdash; it's filtering out relevant sources during analysis.</span></div>
+      </div>
+      <div class="explanation" data-exp="2"><strong>Answer: B.</strong> When subagents execute their assigned work correctly but overall coverage is incomplete, the root cause is the coordinator's task decomposition. If the coordinator never asks "climate policy + agriculture" or "climate policy + labor markets," no downstream agent can recover those gaps. Iterative refinement loops in the coordinator (evaluating synthesis output and re-delegating to fill gaps) address this.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Customer Support Resolution Agent</div>
+
+    <div class="question-card" data-question="3" data-answer="A" data-domain="1">
+      <div class="question-number">Question 3</div>
+      <div class="question-text">Your support agent integrates with three backend systems through MCP tools. Each system returns timestamps in a different format: Unix epoch seconds from billing, ISO 8601 from orders, and date strings like "March 15, 2026" from shipping. The agent frequently confuses dates and makes incorrect comparisons. What's the best approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Implement a PostToolUse hook that normalizes all timestamps to a single format before the model processes them.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Add system prompt instructions explaining each format with conversion examples so the model can interpret them correctly.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add a <code>convert_timestamp</code> tool that the model can call whenever it needs to compare dates across systems.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Request that each backend team standardize their APIs to a common timestamp format.</span></div>
+      </div>
+      <div class="explanation" data-exp="3"><strong>Answer: A.</strong> PostToolUse hooks intercept tool results for transformation before the model processes them &mdash; exactly the pattern for normalizing heterogeneous data formats from different MCP tools. This provides deterministic normalization without adding agent overhead or requiring the model to remember conversion rules.</div>
+    </div>
+
+    <div class="question-card" data-question="4" data-answer="C" data-domain="1">
+      <div class="question-number">Question 4</div>
+      <div class="question-text">Your support agent successfully resolves a complex billing issue, but the customer needs an escalation for a separate policy exception. When handing off to a human agent who cannot see the conversation transcript, what should the agent provide?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">A full transcript of the conversation, so the human agent has complete context.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">The customer's email address so the human agent can re-initiate contact.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">A structured handoff summary with customer ID, root cause analysis, refund amount (if any), and a recommended action.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Only the policy exception request, so the human can investigate without bias from prior context.</span></div>
+      </div>
+      <div class="explanation" data-exp="4"><strong>Answer: C.</strong> Structured handoff summaries (customer ID, root cause, amounts, recommended action) give human agents the critical facts without forcing them to parse a full transcript. Transcripts require reading time and still miss the "what was concluded" synthesis. Structured handoffs are the documented pattern for mid-process escalation.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Developer Productivity with Claude</div>
+
+    <div class="question-card" data-question="5" data-answer="B" data-domain="1">
+      <div class="question-number">Question 5</div>
+      <div class="question-text">You've analyzed a legacy codebase and identified two viable refactoring strategies: (A) extract a shared library, or (B) use dependency injection. Your team wants to compare both approaches in detail before committing. Which session management feature fits this need?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use <code>--resume</code> twice with different session names to create two parallel conversations from scratch.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Use <code>fork_session</code> to create two independent branches from your shared codebase analysis baseline.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Run <code>/compact</code> and then explore both approaches sequentially in the same session.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Use the Explore subagent to investigate each approach in isolation, then merge findings.</span></div>
+      </div>
+      <div class="explanation" data-exp="4"><strong>Answer: B.</strong> <code>fork_session</code> is designed precisely for exploring divergent approaches from a shared analysis baseline. Both forks start with identical context from your codebase analysis, then diverge independently &mdash; letting you compare approaches fairly without repeating the analysis work.</div>
+    </div>
+
+    <div class="question-card" data-question="6" data-answer="D" data-domain="1">
+      <div class="question-number">Question 6</div>
+      <div class="question-text">Your code review agent processes 14-file pull requests in a single pass and produces inconsistent results: thorough analysis for some files, superficial comments for others, and occasionally contradictory feedback between files. How should you restructure the review workflow?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Force developers to submit smaller PRs of at most 3-4 files to ensure consistent analysis.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Switch to a model with a larger context window to give all files adequate attention.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Run three independent review passes and only flag issues that appear in at least two of them.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Use prompt chaining: run per-file analysis passes for local issues, then a separate integration pass for cross-file concerns.</span></div>
+      </div>
+      <div class="explanation" data-exp="6"><strong>Answer: D.</strong> Splitting large reviews into focused passes directly addresses attention dilution. Per-file passes ensure consistent depth on local issues; a separate integration pass handles cross-file data flow without the distraction of per-file details. Option B misunderstands that larger windows don't fix attention quality. Option C would actually suppress real bugs caught intermittently.</div>
+    </div>
+  </div>
+
+  <!-- Domain 2: Tool Design & MCP (18%, 4 questions) -->
+  <div class="domain-section domain-2">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 2</span>
+      <h2>Tool Design &amp; MCP Integration</h2>
+      <span class="domain-weight">18%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Customer Support Resolution Agent</div>
+
+    <div class="question-card" data-question="7" data-answer="B" data-domain="2">
+      <div class="question-number">Question 7</div>
+      <div class="question-text">Your <code>process_refund</code> MCP tool has a business rule: refunds over $500 must go to a supervisor, not be processed automatically. Currently, you rely on the system prompt to instruct the agent not to auto-refund large amounts. Occasionally the agent still processes a $700 refund. What's the most reliable fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add few-shot examples showing the agent escalating all refunds over $500 rather than processing them.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Implement a tool call interception hook that blocks <code>process_refund</code> calls above $500 and redirects to an escalation workflow.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Rephrase the system prompt with stronger language: "You MUST NEVER process refunds over $500 without supervisor approval."</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Remove the <code>process_refund</code> tool from the agent entirely and route all refunds through humans.</span></div>
+      </div>
+      <div class="explanation" data-exp="7"><strong>Answer: B.</strong> Tool call interception hooks provide deterministic enforcement for policy-violating actions. Prompt-based options (A and C) are probabilistic &mdash; they reduce frequency but don't guarantee compliance, which is unacceptable when money is involved. Option D overcorrects by removing a useful capability.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Multi-Agent Research System</div>
+
+    <div class="question-card" data-question="8" data-answer="A" data-domain="2">
+      <div class="question-number">Question 8</div>
+      <div class="question-text">Your research system exposes a list of available research topics, active investigations, and document catalogs to the agent. Currently, the agent wastes calls exploring what's available before starting research. How should you expose this inventory?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Expose the content catalogs as MCP resources, giving agents visibility into available data without exploratory tool calls.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Create a <code>list_topics</code> tool that the agent must call first at the start of every session.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Include the full inventory in the system prompt so it's always in context.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Cache the inventory and expose it through a <code>get_inventory</code> tool with 1-hour TTL.</span></div>
+      </div>
+      <div class="explanation" data-exp="8"><strong>Answer: A.</strong> MCP resources are the documented mechanism for exposing content catalogs (issue summaries, documentation hierarchies, database schemas) to agents. They reduce exploratory tool calls because the agent can see what's available without asking. Tools (B, D) are for actions; resources are for visibility into content. Option C wastes tokens for data rarely fully used.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Structured Data Extraction</div>
+
+    <div class="question-card" data-question="9" data-answer="B" data-domain="2">
+      <div class="question-number">Question 9</div>
+      <div class="question-text">You have a single <code>analyze_document</code> MCP tool used across extraction, summarization, and verification workflows. The agent frequently uses it for the wrong purpose &mdash; e.g., summarizing when extraction was needed, or extracting when summary was requested. What's the best fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Add a required <code>mode</code> parameter to <code>analyze_document</code> with values <code>"extract"</code>, <code>"summarize"</code>, or <code>"verify"</code>.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Split the generic tool into purpose-specific tools: <code>extract_data_points</code>, <code>summarize_content</code>, and <code>verify_claim_against_source</code>.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Improve the system prompt with detailed instructions on when to use each mode of <code>analyze_document</code>.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Add few-shot examples showing correct use of <code>analyze_document</code> for each purpose.</span></div>
+      </div>
+      <div class="explanation" data-exp="9"><strong>Answer: B.</strong> Splitting generic tools into purpose-specific tools with defined input/output contracts is the documented pattern. A tool named <code>extract_data_points</code> is self-documenting &mdash; the agent selects it when it needs extraction. A <code>mode</code> parameter (A) still requires the agent to guess correctly. Prompt-based fixes (C, D) don't address the root ambiguity in the tool interface itself.</div>
+    </div>
+
+    <div class="question-card" data-question="10" data-answer="D" data-domain="2">
+      <div class="question-number">Question 10</div>
+      <div class="question-text">Your extraction pipeline needs to reliably call exactly one of three extraction tools based on document type. The model occasionally returns conversational text instead of calling any extraction tool. How should you configure <code>tool_choice</code>?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use <code>tool_choice: "auto"</code> and add prompt instructions requiring a tool call.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Use <code>tool_choice: {"type": "tool", "name": "extract_invoice"}</code> as a default that the model can override.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use <code>tool_choice: "required"</code> (a new option) to force any tool call.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Use <code>tool_choice: "any"</code> to guarantee the model calls a tool while letting it choose which one.</span></div>
+      </div>
+      <div class="explanation" data-exp="10"><strong>Answer: D.</strong> <code>tool_choice: "any"</code> guarantees the model MUST call a tool but lets it choose which one &mdash; exactly right when you have multiple candidates and document type is unknown. <code>"auto"</code> (A) permits conversational text. Option B forces a specific tool even when it's wrong. Option C is fabricated &mdash; "required" is not a valid <code>tool_choice</code> value.</div>
+    </div>
+  </div>
+
+  <!-- Domain 3: Claude Code (20%, 4 questions) -->
+  <div class="domain-section domain-3">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 3</span>
+      <h2>Claude Code Configuration &amp; Workflows</h2>
+      <span class="domain-weight">20%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Code Generation with Claude Code</div>
+
+    <div class="question-card" data-question="11" data-answer="C" data-domain="3">
+      <div class="question-number">Question 11</div>
+      <div class="question-text">You need to fix a failing date validation in one function in <code>utils/dateHelper.js</code>. You've already reviewed the stack trace and know the exact bug. Which execution mode is appropriate?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Plan mode &mdash; every change should start with a plan to avoid regression.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Plan mode &mdash; single-file changes still benefit from explicit design review.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Direct execution &mdash; the change is well-scoped with a clear fix, no architectural decisions needed.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Direct execution, but spawn an Explore subagent first to verify no cross-file implications.</span></div>
+      </div>
+      <div class="explanation" data-exp="11"><strong>Answer: C.</strong> Direct execution is appropriate for well-understood, single-file changes with clear scope (like a bug fix with a known stack trace). Plan mode is overhead for simple changes; it's designed for architectural decisions, multi-file modifications, or multiple valid approaches. Option D adds unnecessary exploration when the bug and fix are already understood.</div>
+    </div>
+
+    <div class="question-card" data-question="12" data-answer="B" data-domain="3">
+      <div class="question-number">Question 12</div>
+      <div class="question-text">Your team has a massive root <code>CLAUDE.md</code> (900 lines) covering API conventions, testing standards, database patterns, and deployment rules. New maintainers complain it's hard to find relevant sections. You want to reorganize without losing the content. What's the most maintainable approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Move each section to a separate <code>CLAUDE.md</code> in the relevant subdirectory (e.g., <code>api/CLAUDE.md</code>, <code>tests/CLAUDE.md</code>).</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Split into topic-specific files under <code>.claude/rules/</code> and use <code>@import</code> syntax in <code>CLAUDE.md</code> to reference the relevant standards files.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Convert each section into a slash command under <code>.claude/commands/</code> so developers invoke the relevant one.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Keep the monolithic <code>CLAUDE.md</code> but add a detailed table of contents at the top.</span></div>
+      </div>
+      <div class="explanation" data-exp="12"><strong>Answer: B.</strong> <code>@import</code> syntax in CLAUDE.md lets you reference external files, keeping the config modular. Combined with <code>.claude/rules/</code> for topic-specific files (optionally with glob path scoping), this provides focused, maintainable configuration. Option A fragments standards that should span the codebase. Option C requires manual invocation for universally needed standards.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Claude Code for Continuous Integration</div>
+
+    <div class="question-card" data-question="13" data-answer="A" data-domain="3">
+      <div class="question-number">Question 13</div>
+      <div class="question-text">Your CI pipeline runs automated code review and posts comments inline on PRs. The CI script needs to parse Claude's output and map each finding to a specific file and line number. Currently, you're extracting this from plain-text output with regex, which occasionally breaks. How should you structure the output?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use <code>claude -p --output-format json --json-schema findings.schema.json "review this PR"</code> to produce machine-parseable output conforming to a specific schema.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Improve the regex to handle more edge cases in Claude's natural text output.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add instructions in the prompt telling Claude to output findings in a specific format with delimiters.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Pipe Claude's output through a second Claude call to convert it to JSON.</span></div>
+      </div>
+      <div class="explanation" data-exp="13"><strong>Answer: A.</strong> <code>--output-format json</code> combined with <code>--json-schema</code> produces machine-parseable structured findings conforming to your defined schema. This is the documented CI pattern for inline PR commenting. Regex on text (B) and prompt formatting (C) are fragile. Double-LLM calls (D) add cost and latency for no reliability gain.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Developer Productivity with Claude</div>
+
+    <div class="question-card" data-question="14" data-answer="C" data-domain="3">
+      <div class="question-number">Question 14</div>
+      <div class="question-text">You're starting work on an unfamiliar 200K-line codebase. Your first task is to trace the refund flow from API endpoint to database. You suspect the exploration will involve reading many files and producing verbose findings that you don't want cluttering your main work session. What's the recommended approach?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use <code>/compact</code> after the exploration to reduce the context.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Read all candidate files upfront into one big prompt so the model has full context.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use the Explore subagent to isolate the verbose discovery phase and return a summary to the main session.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Switch to plan mode for the exploration to prevent changes until you understand the codebase.</span></div>
+      </div>
+      <div class="explanation" data-exp="14"><strong>Answer: C.</strong> The Explore subagent is designed for isolating verbose discovery output and returning summaries to preserve main conversation context. Option A is reactive cleanup after the damage is done. Option B doesn't scale and still fills context. Option D addresses a different concern (preventing changes), not context isolation.</div>
+    </div>
+  </div>
+
+  <!-- Domain 4: Prompt Engineering (20%, 4 questions) -->
+  <div class="domain-section domain-4">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 4</span>
+      <h2>Prompt Engineering &amp; Structured Output</h2>
+      <span class="domain-weight">20%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Claude Code for Continuous Integration</div>
+
+    <div class="question-card" data-question="15" data-answer="B" data-domain="4">
+      <div class="question-number">Question 15</div>
+      <div class="question-text">Your code review system classifies findings by severity (critical, high, medium, low) but reviewers complain classifications are inconsistent &mdash; the same pattern is flagged as "high" in one PR and "medium" in another. What's the most effective way to achieve consistent classification?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Lower the temperature to 0 for more deterministic output.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Define explicit severity criteria with concrete code examples for each level so the model has clear classification anchors.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add a self-review step where Claude reconsiders its classifications before finalizing.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Run each classification twice and only accept results where both runs agree.</span></div>
+      </div>
+      <div class="explanation" data-exp="15"><strong>Answer: B.</strong> Defining explicit severity criteria with concrete examples for each level provides classification anchors the model can apply consistently. Vague categorical labels ("high," "medium") allow drift. Temperature (A) doesn't fix undefined criteria. Self-review (C) and voting (D) add cost without providing the clarity the model actually lacks.</div>
+    </div>
+
+    <div class="scenario-label">Scenario: Structured Data Extraction</div>
+
+    <div class="question-card" data-question="16" data-answer="C" data-domain="4">
+      <div class="question-number">Question 16</div>
+      <div class="question-text">Your extraction pipeline processes invoices with <code>tool_use</code> + JSON schemas. All outputs pass JSON validation. But downstream systems occasionally receive line items that don't sum to the stated total. What should you add?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Stricter JSON schema validation &mdash; add a constraint that line items must sum to the total.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Retry every extraction twice and compare results for consistency.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Add both <code>stated_total</code> and <code>calculated_total</code> fields to the schema, then compare them post-extraction to flag discrepancies for review.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Switch from <code>tool_use</code> to prompt-based JSON output with stricter format instructions.</span></div>
+      </div>
+      <div class="explanation" data-exp="16"><strong>Answer: C.</strong> JSON schemas eliminate syntax errors but not semantic errors (values that don't math out). Extracting both <code>stated_total</code> and <code>calculated_total</code> creates a self-correction signal the pipeline can check. Option A isn't supported by standard JSON schema. Option B doubles cost without detecting the discrepancy. Option D regresses to a less reliable mechanism.</div>
+    </div>
+
+    <div class="question-card" data-question="17" data-answer="B" data-domain="4">
+      <div class="question-number">Question 17</div>
+      <div class="question-text">Your extraction system handles academic papers. Some have inline citations (Smith, 2024), others use numbered references [12], and a few use footnotes. Your model extracts citations correctly from the inline format but misses 40% when papers use numbered references. What's the most effective fix?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Train a custom classifier to detect citation format before extraction.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Add few-shot examples demonstrating correct extraction from each citation format (inline, numbered, footnoted).</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Require the author to convert all papers to inline citation format before extraction.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Add a required <code>citation_format</code> field so the model must identify the format explicitly.</span></div>
+      </div>
+      <div class="explanation" data-exp="17"><strong>Answer: B.</strong> Few-shot examples demonstrating extraction from varied formats enable the model to generalize to novel patterns. This is the documented technique for handling structural variety in extraction tasks. Custom classifiers (A) are over-engineered. Option C shifts burden externally. Option D doesn't fix the extraction skill gap, it just makes the model declare what format it saw.</div>
+    </div>
+
+    <div class="question-card" data-question="18" data-answer="A" data-domain="4">
+      <div class="question-number">Question 18</div>
+      <div class="question-text">You need to batch-process 10,000 documents overnight with the Message Batches API. Previous runs had a 12% failure rate on oversized documents (context overflow) and occasional timeouts. How should you handle failures on your next run?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Use <code>custom_id</code> fields to identify each request; on batch completion, resubmit only failed documents (chunking oversized ones) rather than the entire batch.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Submit the full 10,000 documents again if any failure occurs to ensure consistency.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use synchronous API calls instead, since the failure rate suggests batch isn't suitable.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Split the batch into 100 batches of 100 documents to isolate failures.</span></div>
+      </div>
+      <div class="explanation" data-exp="18"><strong>Answer: A.</strong> The documented batch failure pattern is: use <code>custom_id</code> to correlate request/response pairs, then resubmit only failed documents with appropriate modifications (e.g., chunking the ones that hit context limits). Option B wastes 88% of a successful batch. Option C abandons cost savings. Option D doesn't improve the per-document failure rate.</div>
+    </div>
+  </div>
+
+  <!-- Domain 5: Context Management (15%, 2 questions) -->
+  <div class="domain-section domain-5">
+    <div class="domain-header">
+      <span class="domain-badge">Domain 5</span>
+      <h2>Context Management &amp; Reliability</h2>
+      <span class="domain-weight">15%</span>
+    </div>
+
+    <div class="scenario-label">Scenario: Multi-Agent Research System</div>
+
+    <div class="question-card" data-question="19" data-answer="C" data-domain="5">
+      <div class="question-number">Question 19</div>
+      <div class="question-text">After reviewing 120 pages of source material, your analysis agent correctly identifies findings from the first 30 pages and last 20 pages but overlooks material from the middle sections. Which mitigation strategy best addresses this?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-letter">A</span><span class="option-text">Upgrade to a model with a larger context window &mdash; more tokens will improve middle-section attention.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Reduce the source material to only the most relevant 50 pages before analysis.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Place key findings summaries at the beginning of aggregated inputs and organize detailed results with explicit section headers.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Increase the max_tokens so the model has room to mention all sections.</span></div>
+      </div>
+      <div class="explanation" data-exp="19"><strong>Answer: C.</strong> The "lost in the middle" effect means models process information at the beginning and end more reliably than the middle. The documented mitigation is placing key findings at the start and using explicit section headers to aid retrieval, not increasing context size (A) which actually worsens the effect. Option D addresses output length, not input attention.</div>
+    </div>
+
+    <div class="question-card" data-question="20" data-answer="B" data-domain="5">
+      <div class="question-number">Question 20</div>
+      <div class="question-text">Your document analysis subagent encounters a source with conflicting statistics: the abstract says "30% increase" and Figure 3 in the same paper shows a 45% increase. How should the subagent report this?</div>
+      <div class="options">
+        <div class="option" data-choice="A"><span class="option-letter">A</span><span class="option-text">Escalate the document to the coordinator for manual reconciliation before continuing.</span></div>
+        <div class="option" data-choice="B"><span class="option-letter">B</span><span class="option-text">Complete the analysis with both values included, explicitly annotated as conflicting, letting the coordinator decide how to handle before passing to synthesis.</span></div>
+        <div class="option" data-choice="C"><span class="option-letter">C</span><span class="option-text">Use the value from the abstract since abstracts are typically the most authoritative source.</span></div>
+        <div class="option" data-choice="D"><span class="option-letter">D</span><span class="option-text">Flag the document as unreliable and exclude it from the final report.</span></div>
+      </div>
+      <div class="explanation" data-exp="20"><strong>Answer: B.</strong> The documented pattern: complete document analysis with conflicting values included and explicitly annotated, letting the coordinator decide how to reconcile before passing to synthesis. This preserves information provenance (both values + their locations) and enables downstream decisions. Silently picking one (C) loses data; excluding the document (D) loses valid findings.</div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area" id="submit-area">
+    <p id="unanswered-warning" class="unanswered-warning"></p>
+    <p>When you're ready, submit to reveal all answers and explanations.</p>
+    <button class="btn" id="submit-btn" onclick="submitExam()">Submit Exam</button>
+    <button class="btn btn-secondary" id="reset-btn" onclick="resetExam()" style="display:none;">Retake Exam</button>
+  </div>
+
+</div>
+
+<script>
+  const state = { answers: {}, submitted: false, results: null };
+  const totalQuestions = 20;
+
+  const domainNames = {
+    '1': 'Agentic Architecture',
+    '2': 'Tool Design & MCP',
+    '3': 'Claude Code Config',
+    '4': 'Prompt & Output',
+    '5': 'Context & Reliability'
+  };
+
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      if (state.submitted) return;
+      const card = this.closest('.question-card');
+      const qNum = card.dataset.question;
+
+      card.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+      card.classList.add('answered');
+      state.answers[qNum] = this.dataset.choice;
+      updateProgress();
+    });
+  });
+
+  function updateProgress() {
+    const count = Object.keys(state.answers).length;
+    const pct = Math.round((count / totalQuestions) * 100);
+    document.getElementById('progress-text').textContent = `${count} of ${totalQuestions} answered`;
+    document.getElementById('progress-pct').textContent = `${pct}%`;
+    document.getElementById('progress-fill').style.width = `${pct}%`;
+  }
+
+  function submitExam() {
+    const answered = Object.keys(state.answers).length;
+    const warning = document.getElementById('unanswered-warning');
+
+    if (answered < totalQuestions) {
+      const missing = totalQuestions - answered;
+      warning.textContent = `${missing} question${missing > 1 ? 's' : ''} unanswered. Unanswered questions count as incorrect. Submit anyway?`;
+      warning.classList.add('visible');
+
+      const btn = document.getElementById('submit-btn');
+      if (btn.dataset.confirmPending !== 'true') {
+        btn.dataset.confirmPending = 'true';
+        btn.textContent = 'Confirm Submit';
+        return;
+      }
+    }
+
+    state.submitted = true;
+
+    let correct = 0;
+    const domainCorrect = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    const domainTotal = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+    const detail = [];
+
+    document.querySelectorAll('.question-card').forEach(card => {
+      const qNum = card.dataset.question;
+      const correctAns = card.dataset.answer;
+      const domain = card.dataset.domain;
+      const userAns = state.answers[qNum] || null;
+      const questionText = card.querySelector('.question-text').innerText.trim();
+
+      domainTotal[domain]++;
+
+      card.querySelectorAll('.option').forEach(opt => {
+        opt.style.cursor = 'default';
+        if (opt.dataset.choice === correctAns) {
+          opt.classList.add('correct-answer');
+        }
+        if (userAns && opt.dataset.choice === userAns && userAns !== correctAns) {
+          opt.classList.add('wrong-answer');
+        }
+      });
+
+      const isCorrect = userAns === correctAns;
+      if (isCorrect) {
+        correct++;
+        domainCorrect[domain]++;
+      }
+
+      detail.push({
+        q: parseInt(qNum),
+        domain: domain,
+        your: userAns,
+        correct: correctAns,
+        isCorrect: isCorrect
+      });
+
+      card.querySelector('.explanation').classList.add('visible');
+    });
+
+    state.results = { correct, total: totalQuestions, domainCorrect, domainTotal, detail };
+
+    renderResults();
+
+    document.getElementById('submit-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'inline-block';
+    document.querySelector('.submit-area p:not(.unanswered-warning)').style.display = 'none';
+    document.getElementById('unanswered-warning').classList.remove('visible');
+
+    document.getElementById('results-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderResults() {
+    const { correct, total, domainCorrect, domainTotal, detail } = state.results;
+    const panel = document.getElementById('results-panel');
+    panel.classList.add('visible');
+    document.getElementById('results-score').textContent = correct;
+
+    // Domain breakdown
+    const breakdown = document.getElementById('results-breakdown');
+    breakdown.innerHTML = '';
+    for (const d of ['1','2','3','4','5']) {
+      const el = document.createElement('div');
+      el.className = `domain-score domain-${d}`;
+      el.innerHTML = `<span class="dot"></span> ${domainNames[d]}: ${domainCorrect[d]}/${domainTotal[d]}`;
+      breakdown.appendChild(el);
+    }
+
+    // Verdict
+    const scaledScore = Math.round(100 + (correct / total) * 900);
+    const verdict = document.getElementById('results-verdict');
+    if (scaledScore >= 720) {
+      verdict.className = 'results-verdict pass';
+      verdict.textContent = `Scaled score: ${scaledScore}/1000 — PASS (720 required)`;
+    } else {
+      verdict.className = 'results-verdict fail';
+      verdict.textContent = `Scaled score: ${scaledScore}/1000 — Below passing (720 required)`;
+    }
+
+    // Wrong answers summary
+    const wrongSummary = document.getElementById('wrong-summary');
+    const wrong = detail.filter(d => !d.isCorrect);
+    if (wrong.length > 0) {
+      wrongSummary.innerHTML = '<h3>Questions to Review</h3>';
+      wrong.forEach(w => {
+        const row = document.createElement('div');
+        row.className = 'wrong-row';
+        row.innerHTML = `
+          <span class="wrong-q">Q${w.q}</span>
+          <span class="wrong-your">Your answer: <strong>${w.your || '—'}</strong></span>
+          <span class="wrong-correct">Correct: <strong>${w.correct}</strong></span>
+        `;
+        wrongSummary.appendChild(row);
+      });
+    } else {
+      wrongSummary.innerHTML = '<h3 style="color: var(--correct);">Perfect Score — No Questions to Review</h3>';
+    }
+
+    // Export box default
+    document.getElementById('export-box').textContent = buildCompactReport();
+  }
+
+  function buildCompactReport() {
+    const { correct, total, detail } = state.results;
+    const wrong = detail.filter(d => !d.isCorrect);
+    const scaledScore = Math.round(100 + (correct / total) * 900);
+    const date = new Date().toISOString().split('T')[0];
+
+    let out = `Claude Architect Foundations — Practice Exam 2 Results\n`;
+    out += `Date: ${date}\n`;
+    out += `Score: ${correct}/${total} (${scaledScore}/1000) — ${scaledScore >= 720 ? 'PASS' : 'FAIL'}\n\n`;
+
+    out += `Wrong answers (Question YourAnswer CorrectAnswer):\n`;
+    if (wrong.length === 0) {
+      out += `  None — perfect score\n`;
+    } else {
+      wrong.forEach(w => {
+        out += `  Q${w.q}: ${w.your || '—'} → ${w.correct}\n`;
+      });
+    }
+    return out;
+  }
+
+  function buildDetailedReport() {
+    const { correct, total, domainCorrect, domainTotal, detail } = state.results;
+    const wrong = detail.filter(d => !d.isCorrect);
+    const scaledScore = Math.round(100 + (correct / total) * 900);
+    const date = new Date().toISOString().split('T')[0];
+
+    let out = `================================================================\n`;
+    out += `Claude Architect Foundations — Practice Exam 2 Results\n`;
+    out += `================================================================\n`;
+    out += `Date: ${date}\n`;
+    out += `Score: ${correct}/${total} correct (${Math.round(correct/total*100)}%)\n`;
+    out += `Scaled: ${scaledScore}/1000 (720 needed to pass) — ${scaledScore >= 720 ? 'PASS' : 'FAIL'}\n\n`;
+
+    out += `Per-domain breakdown:\n`;
+    for (const d of ['1','2','3','4','5']) {
+      const pct = Math.round(domainCorrect[d]/domainTotal[d]*100);
+      out += `  Domain ${d} (${domainNames[d]}): ${domainCorrect[d]}/${domainTotal[d]} (${pct}%)\n`;
+    }
+
+    out += `\nAll answers:\n`;
+    detail.forEach(d => {
+      const mark = d.isCorrect ? '✓' : '✗';
+      out += `  Q${d.q} [D${d.domain}] ${mark} Your: ${d.your || '—'} | Correct: ${d.correct}\n`;
+    });
+
+    if (wrong.length > 0) {
+      out += `\nWrong answers (for targeted review):\n`;
+      wrong.forEach(w => {
+        out += `  Q${w.q} (Domain ${w.domain}): chose ${w.your || '—'}, correct was ${w.correct}\n`;
+      });
+    }
+
+    return out;
+  }
+
+  function buildJsonReport() {
+    const { correct, total, domainCorrect, domainTotal, detail } = state.results;
+    const scaledScore = Math.round(100 + (correct / total) * 900);
+    return JSON.stringify({
+      exam: "Claude Architect Foundations - Practice Exam 2",
+      date: new Date().toISOString(),
+      score: { correct, total, percentage: Math.round(correct/total*100), scaled: scaledScore, passed: scaledScore >= 720 },
+      byDomain: ['1','2','3','4','5'].map(d => ({
+        domain: d,
+        name: domainNames[d],
+        correct: domainCorrect[d],
+        total: domainTotal[d]
+      })),
+      answers: detail
+    }, null, 2);
+  }
+
+  function copyResults(format) {
+    let text;
+    if (format === 'compact') text = buildCompactReport();
+    else if (format === 'detailed') text = buildDetailedReport();
+    else text = buildJsonReport();
+
+    document.getElementById('export-box').textContent = text;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btns = document.querySelectorAll('.export-btn');
+      btns.forEach(b => b.classList.remove('copied'));
+      event.target.closest('.export-btn').classList.add('copied');
+      const span = event.target.closest('.export-btn').querySelector('span');
+      const originalText = span.textContent;
+      span.textContent = 'Copied!';
+      setTimeout(() => {
+        span.textContent = originalText;
+        event.target.closest('.export-btn').classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      alert('Copy failed. Select the text manually from the box above.');
+    });
+  }
+
+  function downloadResults() {
+    const text = buildDetailedReport();
+    const date = new Date().toISOString().split('T')[0];
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `exam2-results-${date}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function resetExam() {
+    state.answers = {};
+    state.submitted = false;
+    state.results = null;
+
+    document.querySelectorAll('.question-card').forEach(card => {
+      card.classList.remove('answered');
+      card.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected', 'correct-answer', 'wrong-answer');
+        opt.style.cursor = 'pointer';
+      });
+      card.querySelector('.explanation').classList.remove('visible');
+    });
+
+    document.getElementById('results-panel').classList.remove('visible');
+    document.getElementById('submit-btn').style.display = 'inline-block';
+    document.getElementById('submit-btn').textContent = 'Submit Exam';
+    document.getElementById('submit-btn').dataset.confirmPending = '';
+    document.getElementById('reset-btn').style.display = 'none';
+    document.querySelectorAll('.submit-area p:not(.unanswered-warning)').forEach(p => p.style.display = '');
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

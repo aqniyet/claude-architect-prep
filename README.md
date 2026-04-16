@@ -4,7 +4,7 @@ Practice exam and targeted study materials for the **Claude Certified Architect 
 
 ## What's Inside
 
-### [practice-exam.html](practice-exam.html)
+### [practice-exam.html](practice-exam.html) — Exam 1
 Interactive 20-question practice exam covering all 5 domains:
 - Domain 1: Agentic Architecture & Orchestration (27%)
 - Domain 2: Tool Design & MCP Integration (18%)
@@ -13,6 +13,14 @@ Interactive 20-question practice exam covering all 5 domains:
 - Domain 5: Context Management & Reliability (15%)
 
 Answers are hidden until you submit. Includes per-domain scoring and a scaled score out of 1000 (720 to pass).
+
+### [practice-exam-2.html](practice-exam-2.html) — Exam 2
+A second 20-question exam with completely different questions, same domain weightings. Adds a **results export feature** — after submitting, you can:
+- Copy results in compact, detailed, or JSON format
+- Download results as a `.txt` file
+- See a wrong-answer summary at a glance
+
+Useful for sharing your results with a study partner or AI assistant for targeted analysis.
 
 ### [study-guide.html](study-guide.html)
 4-chapter study guide that builds from basics to exam-level depth:
