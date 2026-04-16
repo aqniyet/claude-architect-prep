@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adaptive Practice Exam — Claude Certified Architect Foundations</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232733;
+    --border: #2e3340;
+    --text: #e2e4e9;
+    --text-dim: #8b8fa3;
+    --accent: #c4956a;
+    --accent-light: #dbb592;
+    --correct: #4ade80;
+    --correct-bg: rgba(74, 222, 128, 0.08);
+    --wrong: #f87171;
+    --wrong-bg: rgba(248, 113, 113, 0.08);
+    --domain1: #7c9bf5;
+    --domain2: #b58bf5;
+    --domain3: #f5a35b;
+    --domain4: #5be0b5;
+    --domain5: #f57088;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+  }
+
+  /* Top status bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,17,23,0.95);
+    backdrop-filter: blur(8px);
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .topbar-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; color: var(--text-dim); }
+  .topbar-left strong { color: var(--text); }
+  .round-pill {
+    background: rgba(196, 149, 106, 0.12);
+    color: var(--accent);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .domain-chips {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .chip.domain-1 .dot { background: var(--domain1); }
+  .chip.domain-2 .dot { background: var(--domain2); }
+  .chip.domain-3 .dot { background: var(--domain3); }
+  .chip.domain-4 .dot { background: var(--domain4); }
+  .chip.domain-5 .dot { background: var(--domain5); }
+  .chip .pct { color: var(--text); font-weight: 700; }
+  .chip.weak { border-color: var(--wrong); color: var(--wrong); }
+  .chip.weak .pct { color: var(--wrong); }
+  .chip.strong { border-color: var(--correct); color: var(--correct); }
+  .chip.strong .pct { color: var(--correct); }
+  .chip.untested .pct { color: var(--text-dim); }
+
+  /* Main sections */
+  header {
+    text-align: center;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+  }
+
+  header p { color: var(--text-dim); font-size: 0.9rem; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+  }
+  .btn:hover { background: var(--accent-light); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--surface); border-color: var(--text-dim); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--wrong);
+    border: 1px solid var(--wrong);
+  }
+  .btn-danger:hover { background: var(--wrong-bg); }
+
+  /* Start screen */
+  .start-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .start-card h2 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+  .start-card p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; }
+  .start-card ul { color: var(--text-dim); font-size: 0.88rem; margin-left: 1rem; margin-bottom: 1rem; }
+  .start-card li { margin-bottom: 0.35rem; }
+
+  /* Round intro */
+  .round-intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .round-intro h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .round-intro .distribution {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0.75rem 0;
+  }
+  .round-intro .dist-pill {
+    background: var(--surface2);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .round-intro .dist-pill .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .round-intro .dist-pill.domain-1 .dot { background: var(--domain1); }
+  .round-intro .dist-pill.domain-2 .dot { background: var(--domain2); }
+  .round-intro .dist-pill.domain-3 .dot { background: var(--domain3); }
+  .round-intro .dist-pill.domain-4 .dot { background: var(--domain4); }
+  .round-intro .dist-pill.domain-5 .dot { background: var(--domain5); }
+  .round-intro .rationale {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  /* Progress */
+  .progress-bar {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  /* Question cards (lifted from exam 2) */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  .question-card.answered { border-color: var(--accent); }
+
+  .q-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+  .q-num {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .q-domain-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .q-domain-tag.domain-1 { background: rgba(124,155,245,0.15); color: var(--domain1); }
+  .q-domain-tag.domain-2 { background: rgba(181,139,245,0.15); color: var(--domain2); }
+  .q-domain-tag.domain-3 { background: rgba(245,163,91,0.15); color: var(--domain3); }
+  .q-domain-tag.domain-4 { background: rgba(91,224,181,0.15); color: var(--domain4); }
+  .q-domain-tag.domain-5 { background: rgba(245,112,136,0.15); color: var(--domain5); }
+  .q-scenario { font-size: 0.75rem; color: var(--text-dim); font-style: italic; margin-left: auto; }
+
+  .question-text {
+    font-size: 0.95rem;
+    margin-bottom: 1.15rem;
+    line-height: 1.65;
+  }
+  .question-text code, .explanation code, .option-text code {
+    background: var(--surface2);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.87em;
+    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    color: var(--accent-light);
+  }
+
+  .options { display: flex; flex-direction: column; gap: 0.5rem; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .option:hover { border-color: var(--accent); background: rgba(196, 149, 106, 0.04); }
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.08);
+  }
+  .option-letter {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.2s ease;
+    margin-top: 1px;
+  }
+  .option.selected .option-letter {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .option-text { flex: 1; }
+
+  .option.correct-answer {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+  .option.correct-answer .option-letter {
+    border-color: var(--correct);
+    background: var(--correct);
+    color: var(--bg);
+  }
+  .option.wrong-answer {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+  }
+  .option.wrong-answer .option-letter {
+    border-color: var(--wrong);
+    background: var(--wrong);
+    color: var(--bg);
+  }
+
+  .explanation {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-size: 0.87rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent);
+  }
+  .explanation.visible { display: block; }
+  .explanation strong { color: var(--text); }
+
+  /* Submit / results */
+  .submit-area {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .submit-area p { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 1rem; }
+  .unanswered-warning {
+    display: none;
+    color: var(--wrong);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+  .unanswered-warning.visible { display: block; }
+
+  .results-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-top: 1.5rem;
+  }
+  .results-panel.visible { display: block; }
+
+  .results-score {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    text-align: center;
+  }
+  .results-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+  .results-verdict {
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 8px;
+    display: inline-block;
+    margin: 0 auto;
+  }
+  .results-verdict.pass { background: var(--correct-bg); color: var(--correct); border: 1px solid rgba(74, 222, 128, 0.2); }
+  .results-verdict.fail { background: var(--wrong-bg); color: var(--wrong); border: 1px solid rgba(248, 113, 113, 0.2); }
+  .center-row { text-align: center; margin: 0.5rem 0 1rem; }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin: 1.25rem 0;
+  }
+  .bd-item {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
+  }
+  .bd-item .bd-label {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .bd-item .bd-label .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .bd-item.domain-1 .dot { background: var(--domain1); }
+  .bd-item.domain-2 .dot { background: var(--domain2); }
+  .bd-item.domain-3 .dot { background: var(--domain3); }
+  .bd-item.domain-4 .dot { background: var(--domain4); }
+  .bd-item.domain-5 .dot { background: var(--domain5); }
+  .bd-item .bd-val { font-weight: 600; }
+
+  /* Log viewer */
+  .log-section {
+    margin-top: 3rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+  .log-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .log-header h2 { font-size: 1rem; font-weight: 600; }
+  .log-header .log-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .log-table-wrapper {
+    max-height: 360px;
+    overflow: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  table.log-table th {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    background: var(--surface2);
+    position: sticky;
+    top: 0;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.log-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.log-table tr:last-child td { border-bottom: none; }
+  table.log-table td.mark-ok { color: var(--correct); font-weight: 600; }
+  table.log-table td.mark-bad { color: var(--wrong); font-weight: 600; }
+  .log-empty { padding: 1.5rem; color: var(--text-dim); font-style: italic; text-align: center; }
+
+  .notice {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 0.85rem 1.15rem;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+  .notice.warn { border-left-color: var(--wrong); }
+  .notice.info { border-left-color: var(--domain4); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .container { padding: 1rem 1rem 3rem; }
+    header h1 { font-size: 1.3rem; }
+    .question-card { padding: 1.1rem; }
+    .breakdown-grid { grid-template-columns: 1fr 1fr; }
+    .topbar-inner { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <span class="round-pill" id="round-pill">Round --</span>
+      <span id="session-short">No active session</span>
+    </div>
+    <div class="domain-chips" id="domain-chips"></div>
+  </div>
+</div>
+
+<div class="container">
+  <header>
+    <h1>Adaptive Practice Exam</h1>
+    <p>Claude Certified Architect Foundations &middot; 200-question bank &middot; focuses on your weak areas after Round 1</p>
+  </header>
+
+  <!-- Session controls -->
+  <div class="controls" id="controls">
+    <button class="btn" id="btn-new-session">Start new session</button>
+    <button class="btn btn-secondary hidden" id="btn-continue">Continue session</button>
+    <button class="btn btn-secondary hidden" id="btn-end">End session &amp; export log</button>
+    <button class="btn btn-danger hidden" id="btn-reset">Clear session</button>
+  </div>
+
+  <!-- Start screen copy -->
+  <div class="start-card" id="start-card">
+    <h2>How it works</h2>
+    <p>Round 1 is a 20-question placement exam &mdash; fixed distribution across the five domains (6/4/4/4/2) so your baseline is directly comparable to the static practice exams. Subsequent rounds are also 20 questions, but the slots shift toward domains where you've performed weakest. Every question you answer is logged with timing and exported as JSON at session end.</p>
+    <ul>
+      <li>Questions don't repeat within a session.</li>
+      <li>Your session is saved in your browser &mdash; you can close the tab and resume.</li>
+      <li>Run as many rounds as you want. Stop when you feel ready.</li>
+    </ul>
+    <p><strong>Click "Start new session"</strong> above to begin Round 1.</p>
+  </div>
+
+  <!-- Notice area (pool-exhausted, etc.) -->
+  <div id="notice-area"></div>
+
+  <!-- Round intro -->
+  <div class="round-intro hidden" id="round-intro">
+    <h2 id="round-title">Round 2</h2>
+    <div id="round-rationale" class="rationale"></div>
+    <div class="distribution" id="round-distribution"></div>
+  </div>
+
+  <!-- Progress bar for current round -->
+  <div class="progress-bar hidden" id="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- Question area -->
+  <div id="questions"></div>
+
+  <!-- Submit -->
+  <div class="submit-area hidden" id="submit-area">
+    <p id="unanswered-warning" class="unanswered-warning"></p>
+    <p id="submit-hint">When you're ready, submit to reveal answers and log results.</p>
+    <button class="btn" id="submit-btn">Submit Round</button>
+    <button class="btn btn-secondary hidden" id="next-round-btn">Start Round &mdash;</button>
+  </div>
+
+  <!-- Round results panel -->
+  <div class="results-panel" id="results-panel">
+    <div class="results-score" id="results-score">--</div>
+    <div class="results-label" id="results-label">score</div>
+    <div class="center-row">
+      <span class="results-verdict" id="results-verdict"></span>
+    </div>
+    <div class="breakdown-grid" id="results-breakdown"></div>
+  </div>
+
+  <!-- Log viewer (always visible once a session has data) -->
+  <div class="log-section hidden" id="log-section">
+    <div class="log-header">
+      <h2>Session log <span id="log-count" style="color:var(--text-dim); font-weight: 400; font-size: 0.85rem;"></span></h2>
+      <div class="log-actions">
+        <button class="btn btn-secondary" id="btn-copy-log">Copy JSON</button>
+        <button class="btn btn-secondary" id="btn-download-log">Download JSON</button>
+      </div>
+    </div>
+    <div class="log-table-wrapper">
+      <table class="log-table" id="log-table">
+        <thead><tr>
+          <th>Round</th><th>ID</th><th>Domain</th><th>Your</th><th>Correct</th><th>Time</th>
+        </tr></thead>
+        <tbody id="log-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="question-bank.js"></script>
+<script>
+// ==========================================================================
+// Adaptive exam engine
+// ==========================================================================
+
+const SESSION_KEY = "adaptive-exam-session";
+const ROUND_SIZE = 20;
+const PASS_SCALED = 720;
+
+const DOMAIN_NAMES_SHORT = {
+  1: DOMAIN_META[1].short, 2: DOMAIN_META[2].short, 3: DOMAIN_META[3].short,
+  4: DOMAIN_META[4].short, 5: DOMAIN_META[5].short
+};
+const DOMAIN_NAMES_FULL = {
+  1: DOMAIN_META[1].name, 2: DOMAIN_META[2].name, 3: DOMAIN_META[3].name,
+  4: DOMAIN_META[4].name, 5: DOMAIN_META[5].name
+};
+
+// -------- session state persistence --------
+
+function loadSession() {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+function newSession() {
+  return {
+    sessionId: newId(),
+    startedAt: new Date().toISOString(),
+    bankVersion: BANK_VERSION,
+    currentRound: 0,       // 0 = no round started yet
+    askedIds: [],
+    rounds: [],            // each completed round
+    activeRound: null      // round in progress (selected Qs, user answers, not yet submitted)
+  };
+}
+
+function newId() {
+  // Simple UUID-ish: timestamp + random
+  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+}
+
+// -------- cumulative stats across completed rounds --------
+
+function computeCumulative(session) {
+  const s = { 1:{asked:0,correct:0}, 2:{asked:0,correct:0}, 3:{asked:0,correct:0}, 4:{asked:0,correct:0}, 5:{asked:0,correct:0} };
+  for (const r of session.rounds) {
+    for (const q of r.questions) {
+      s[q.domain].asked++;
+      if (q.isCorrect) s[q.domain].correct++;
+    }
+  }
+  return s;
+}
+
+// -------- adaptive distribution algorithm --------
+
+function computeNextDistribution(cum) {
+  // Cumulative error rate per domain, floored to keep floor coverage.
+  const need = {};
+  for (const d of [1,2,3,4,5]) {
+    const asked = cum[d].asked;
+    const wrong = asked - cum[d].correct;
+    const errorRate = asked > 0 ? (wrong / asked) : 0.5;  // treat untested as moderate need
+    const w = DOMAIN_META[d].weight;
+    need[d] = Math.max(0.05, errorRate) * w;
+  }
+  const sum = Object.values(need).reduce((a,b) => a+b, 0);
+
+  // Raw fractional slots
+  const raw = {};
+  for (const d of [1,2,3,4,5]) raw[d] = (need[d] / sum) * ROUND_SIZE;
+
+  // Round, with a minimum of 1 per domain
+  let slots = {};
+  for (const d of [1,2,3,4,5]) slots[d] = Math.max(1, Math.round(raw[d]));
+
+  // Adjust to exact ROUND_SIZE: remove from highest-slot domain while > min, or add to highest need.
+  let total = Object.values(slots).reduce((a,b) => a+b, 0);
+  while (total !== ROUND_SIZE) {
+    if (total > ROUND_SIZE) {
+      // take 1 from the domain with biggest excess (slots - raw)
+      let target = 1;
+      let maxExcess = -Infinity;
+      for (const d of [1,2,3,4,5]) {
+        if (slots[d] <= 1) continue;
+        const excess = slots[d] - raw[d];
+        if (excess > maxExcess) { maxExcess = excess; target = d; }
+      }
+      slots[target]--;
+      total--;
+    } else {
+      // add 1 to domain with biggest deficit (raw - slots)
+      let target = 1;
+      let maxDeficit = -Infinity;
+      for (const d of [1,2,3,4,5]) {
+        const deficit = raw[d] - slots[d];
+        if (deficit > maxDeficit) { maxDeficit = deficit; target = d; }
+      }
+      slots[target]++;
+      total++;
+    }
+  }
+  return slots;
+}
+
+// -------- question selection (respecting no-repeat) --------
+
+function selectQuestionsForRound(session, distribution) {
+  const askedSet = new Set(session.askedIds);
+  // Partition bank by domain, excluding asked.
+  const available = { 1:[], 2:[], 3:[], 4:[], 5:[] };
+  for (const q of QUESTION_BANK) {
+    if (!askedSet.has(q.id)) available[q.domain].push(q);
+  }
+
+  // Seeded shuffle (Fisher-Yates) per domain, seed from sessionId + roundNumber
+  const seedBase = hashString(session.sessionId + ":" + (session.currentRound + 1));
+  const selections = [];
+  const poolExhausted = [];
+  let leftoverSlots = 0;
+
+  const wantMap = Object.assign({}, distribution);
+
+  // First pass: fulfill each domain's allocation from its own pool
+  for (const d of [1,2,3,4,5]) {
+    const pool = available[d];
+    shuffle(pool, seedBase + d);
+    const want = wantMap[d];
+    const taken = pool.slice(0, want);
+    if (taken.length < want) {
+      poolExhausted.push(d);
+      leftoverSlots += (want - taken.length);
+    }
+    selections.push(...taken);
+    // remove taken from pool so leftover redistribution doesn't reuse
+    available[d] = pool.slice(taken.length);
+  }
+
+  // Second pass: redistribute leftover slots to domains with pool left, preferring weakest
+  if (leftoverSlots > 0) {
+    const cum = computeCumulative(session);
+    const need = [1,2,3,4,5].map(d => ({
+      d,
+      errorRate: cum[d].asked > 0 ? (cum[d].asked - cum[d].correct) / cum[d].asked : 0.5,
+      poolLeft: available[d].length
+    })).filter(x => x.poolLeft > 0)
+      .sort((a,b) => b.errorRate - a.errorRate);
+
+    let i = 0;
+    while (leftoverSlots > 0 && need.length > 0) {
+      const entry = need[i % need.length];
+      if (entry.poolLeft > 0) {
+        const take = available[entry.d].shift();
+        selections.push(take);
+        entry.poolLeft--;
+        leftoverSlots--;
+      }
+      i++;
+      // remove exhausted entries
+      if (need.every(e => e.poolLeft === 0)) break;
+    }
+  }
+
+  return { questions: selections, poolExhausted, leftoverRemaining: leftoverSlots };
+}
+
+// Deterministic shuffle (mulberry32 PRNG seeded by number)
+function shuffle(arr, seed) {
+  let s = seed >>> 0;
+  const rand = () => {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function hashString(str) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h;
+}
+
+// ==========================================================================
+// UI rendering
+// ==========================================================================
+
+let session = loadSession();
+
+function render() {
+  renderTopbar();
+  renderControls();
+  renderStartCard();
+  renderNotice();
+  renderRoundIntro();
+  renderQuestions();
+  renderSubmitArea();
+  renderResultsPanel();
+  renderLog();
+}
+
+function renderTopbar() {
+  const pill = document.getElementById("round-pill");
+  const short = document.getElementById("session-short");
+  const chips = document.getElementById("domain-chips");
+
+  if (!session) {
+    pill.textContent = "No session";
+    short.textContent = "";
+    chips.innerHTML = "";
+    return;
+  }
+  const r = session.activeRound ? session.activeRound.round : (session.rounds.length || 0);
+  pill.textContent = r > 0 ? ("Round " + r) : "Ready";
+  short.textContent = "Session " + session.sessionId.split("-")[0];
+
+  // Cumulative chips
+  const cum = computeCumulative(session);
+  chips.innerHTML = "";
+  for (const d of [1,2,3,4,5]) {
+    const el = document.createElement("span");
+    el.className = "chip domain-" + d;
+    const asked = cum[d].asked;
+    let pctStr = "--";
+    let cls = "untested";
+    if (asked > 0) {
+      const pct = Math.round((cum[d].correct / asked) * 100);
+      pctStr = pct + "%";
+      if (pct < 60) cls = "weak";
+      else if (pct >= 85) cls = "strong";
+    }
+    el.classList.add(cls);
+    el.innerHTML = '<span class="dot"></span>D' + d + ' <span class="pct">' + pctStr + '</span>';
+    el.title = DOMAIN_NAMES_FULL[d] + (asked > 0 ? (' — ' + cum[d].correct + '/' + asked) : ' — not yet tested');
+    chips.appendChild(el);
+  }
+}
+
+function renderControls() {
+  const btnNew = document.getElementById("btn-new-session");
+  const btnCont = document.getElementById("btn-continue");
+  const btnEnd = document.getElementById("btn-end");
+  const btnReset = document.getElementById("btn-reset");
+
+  // New session button always visible
+  btnNew.classList.remove("hidden");
+
+  if (!session) {
+    btnCont.classList.add("hidden");
+    btnEnd.classList.add("hidden");
+    btnReset.classList.add("hidden");
+    return;
+  }
+
+  const hasActiveRound = !!session.activeRound;
+  const hasFinishedRounds = session.rounds.length > 0;
+
+  btnCont.classList.toggle("hidden", !hasActiveRound);
+  btnEnd.classList.toggle("hidden", !hasFinishedRounds);
+  btnReset.classList.toggle("hidden", !(hasFinishedRounds || hasActiveRound));
+}
+
+function renderStartCard() {
+  const card = document.getElementById("start-card");
+  // Hide when a round is in progress or completed
+  if (session && (session.activeRound || session.rounds.length > 0)) {
+    card.classList.add("hidden");
+  } else {
+    card.classList.remove("hidden");
+  }
+}
+
+let pendingNotice = null;
+function renderNotice() {
+  const area = document.getElementById("notice-area");
+  area.innerHTML = "";
+  if (!pendingNotice) return;
+  const n = document.createElement("div");
+  n.className = "notice " + (pendingNotice.level || "info");
+  n.innerHTML = pendingNotice.html;
+  area.appendChild(n);
+}
+
+function renderRoundIntro() {
+  const el = document.getElementById("round-intro");
+  if (!session || !session.activeRound || session.activeRound.round === 1) {
+    el.classList.add("hidden");
+    return;
+  }
+  const round = session.activeRound;
+  el.classList.remove("hidden");
+  document.getElementById("round-title").textContent = "Round " + round.round;
+  const rationaleEl = document.getElementById("round-rationale");
+
+  // Find weakest domain
+  const cum = computeCumulative(session);
+  let weakestD = null, weakestPct = 1.01;
+  for (const d of [1,2,3,4,5]) {
+    if (cum[d].asked === 0) continue;
+    const pct = cum[d].correct / cum[d].asked;
+    if (pct < weakestPct) { weakestPct = pct; weakestD = d; }
+  }
+  const rationale = weakestD
+    ? "Focusing more on <strong>" + DOMAIN_NAMES_FULL[weakestD] + "</strong> (currently " + Math.round(weakestPct * 100) + "%)."
+    : "Slots redistributed based on your cumulative performance.";
+  rationaleEl.innerHTML = rationale;
+
+  // Distribution pills
+  const dist = round.distribution;
+  const distEl = document.getElementById("round-distribution");
+  distEl.innerHTML = "";
+  for (const d of [1,2,3,4,5]) {
+    const p = document.createElement("span");
+    p.className = "dist-pill domain-" + d;
+    p.innerHTML = '<span class="dot"></span>D' + d + ": " + dist[d];
+    p.title = DOMAIN_NAMES_FULL[d] + " — " + dist[d] + " question" + (dist[d] === 1 ? "" : "s") + " in this round";
+    distEl.appendChild(p);
+  }
+}
+
+function renderQuestions() {
+  const host = document.getElementById("questions");
+  const pbar = document.getElementById("progress-bar");
+  host.innerHTML = "";
+
+  if (!session || !session.activeRound) {
+    pbar.classList.add("hidden");
+    return;
+  }
+  pbar.classList.remove("hidden");
+
+  const round = session.activeRound;
+  round.questions.forEach((q, idx) => {
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.dataset.idx = idx;
+    if (round.userAnswers[q.id] !== undefined) card.classList.add("answered");
+
+    const header = document.createElement("div");
+    header.className = "q-header";
+    header.innerHTML =
+      '<span class="q-num">Question ' + (idx + 1) + ' of ' + round.questions.length + '</span>' +
+      '<span class="q-domain-tag domain-' + q.domain + '">D' + q.domain + '</span>' +
+      (q.scenario ? '<span class="q-scenario">' + q.scenario + '</span>' : "");
+    card.appendChild(header);
+
+    const qt = document.createElement("div");
+    qt.className = "question-text";
+    qt.innerHTML = q.q;
+    card.appendChild(qt);
+
+    const optsEl = document.createElement("div");
+    optsEl.className = "options";
+    for (const letter of ["A","B","C","D"]) {
+      const o = document.createElement("div");
+      o.className = "option";
+      o.dataset.choice = letter;
+      const userChoice = round.userAnswers[q.id];
+      if (userChoice === letter) o.classList.add("selected");
+      if (round.submitted) {
+        if (letter === q.a) o.classList.add("correct-answer");
+        if (userChoice === letter && userChoice !== q.a) o.classList.add("wrong-answer");
+        o.style.cursor = "default";
+      }
+      o.innerHTML =
+        '<span class="option-letter">' + letter + '</span>' +
+        '<span class="option-text">' + q.opts[letter] + '</span>';
+      if (!round.submitted) {
+        o.addEventListener("click", () => onAnswerOption(q.id, letter));
+      }
+      optsEl.appendChild(o);
+    }
+    card.appendChild(optsEl);
+
+    const exp = document.createElement("div");
+    exp.className = "explanation" + (round.submitted ? " visible" : "");
+    exp.innerHTML = "<strong>Answer: " + q.a + ".</strong> " + q.exp;
+    card.appendChild(exp);
+
+    host.appendChild(card);
+  });
+
+  updateProgressBar();
+}
+
+function updateProgressBar() {
+  if (!session || !session.activeRound) return;
+  const total = session.activeRound.questions.length;
+  const answered = Object.keys(session.activeRound.userAnswers).length;
+  const pct = Math.round((answered / total) * 100);
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+function renderSubmitArea() {
+  const area = document.getElementById("submit-area");
+  if (!session || !session.activeRound) {
+    area.classList.add("hidden");
+    return;
+  }
+  area.classList.remove("hidden");
+  const round = session.activeRound;
+  const submitBtn = document.getElementById("submit-btn");
+  const nextBtn = document.getElementById("next-round-btn");
+
+  if (round.submitted) {
+    submitBtn.classList.add("hidden");
+    nextBtn.classList.remove("hidden");
+    nextBtn.textContent = "Start Round " + (round.round + 1);
+    document.getElementById("submit-hint").classList.add("hidden");
+  } else {
+    submitBtn.classList.remove("hidden");
+    nextBtn.classList.add("hidden");
+    document.getElementById("submit-hint").classList.remove("hidden");
+    submitBtn.textContent = submitBtn.dataset.confirmPending === "true" ? "Confirm Submit" : "Submit Round";
+  }
+}
+
+function renderResultsPanel() {
+  const panel = document.getElementById("results-panel");
+  if (!session || !session.activeRound || !session.activeRound.submitted) {
+    panel.classList.remove("visible");
+    return;
+  }
+  panel.classList.add("visible");
+  const round = session.activeRound;
+  document.getElementById("results-score").textContent = round.correct + " / " + round.questions.length;
+  document.getElementById("results-label").textContent =
+    "Round " + round.round + " &middot; " + round.scalePct + "% &middot; scaled " + round.scaledScore + "/1000";
+  document.getElementById("results-label").innerHTML = "Round " + round.round + " &middot; " + round.scalePct + "% &middot; scaled " + round.scaledScore + "/1000";
+
+  const v = document.getElementById("results-verdict");
+  if (round.scaledScore >= PASS_SCALED) {
+    v.className = "results-verdict pass";
+    v.textContent = "PASS (720 required)";
+  } else {
+    v.className = "results-verdict fail";
+    v.textContent = "Below passing (720 required)";
+  }
+
+  const bd = document.getElementById("results-breakdown");
+  bd.innerHTML = "";
+  for (const d of [1,2,3,4,5]) {
+    const asked = round.byDomain[d].asked;
+    const correct = round.byDomain[d].correct;
+    if (asked === 0) continue;
+    const pct = Math.round((correct / asked) * 100);
+    const item = document.createElement("div");
+    item.className = "bd-item domain-" + d;
+    item.innerHTML =
+      '<div class="bd-label"><span class="dot"></span>' + DOMAIN_NAMES_SHORT[d] + '</div>' +
+      '<div class="bd-val">' + correct + "/" + asked + " (" + pct + '%)</div>';
+    bd.appendChild(item);
+  }
+}
+
+function renderLog() {
+  const sec = document.getElementById("log-section");
+  const tbody = document.getElementById("log-tbody");
+  const count = document.getElementById("log-count");
+  tbody.innerHTML = "";
+  if (!session || session.rounds.length === 0 && !session.activeRound) {
+    sec.classList.add("hidden");
+    return;
+  }
+  sec.classList.remove("hidden");
+
+  const rows = allLoggedQuestions();
+  count.textContent = "(" + rows.length + " entries)";
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="log-empty">No questions answered yet.</td></tr>';
+    return;
+  }
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    const timeStr = r.timeMs != null ? Math.round(r.timeMs / 100) / 10 + "s" : "--";
+    tr.innerHTML =
+      "<td>" + r.round + "</td>" +
+      "<td>" + r.id + "</td>" +
+      '<td><span class="chip domain-' + r.domain + '" style="padding: 0 0.4rem; font-size: 0.7rem;"><span class="dot"></span>D' + r.domain + "</span></td>" +
+      "<td>" + (r.chosen || "—") + "</td>" +
+      "<td>" + r.correct + "</td>" +
+      '<td class="' + (r.isCorrect ? "mark-ok" : "mark-bad") + '">' + (r.isCorrect ? "✓ " : "✗ ") + timeStr + "</td>";
+    tbody.appendChild(tr);
+  }
+}
+
+function allLoggedQuestions() {
+  if (!session) return [];
+  const rows = [];
+  for (const r of session.rounds) {
+    for (const q of r.questions) {
+      rows.push({ round: r.round, ...q });
+    }
+  }
+  // Also include the active round's answered-but-not-yet-submitted questions if submitted
+  if (session.activeRound && session.activeRound.submitted) {
+    // already in rounds after submission; no-op
+  }
+  return rows;
+}
+
+// ==========================================================================
+// Actions
+// ==========================================================================
+
+function onStartNewSession() {
+  if (session && (session.activeRound || session.rounds.length > 0)) {
+    if (!confirm("This will clear your current session and log. Continue?")) return;
+  }
+  session = newSession();
+  pendingNotice = null;
+  saveSession(session);
+  startRound(1);
+}
+
+function onContinueSession() {
+  // Session is already loaded; just re-render
+  render();
+  scrollToTop();
+}
+
+function onClearSession() {
+  if (!confirm("Clear the current session and its log?")) return;
+  clearSession();
+  session = null;
+  pendingNotice = null;
+  render();
+}
+
+function onEndSession() {
+  // Just trigger download
+  downloadLog();
+}
+
+function startRound(roundNumber) {
+  const distribution = roundNumber === 1
+    ? PLACEMENT_DISTRIBUTION
+    : computeNextDistribution(computeCumulative(session));
+
+  const { questions, poolExhausted, leftoverRemaining } = selectQuestionsForRound(session, distribution);
+
+  if (questions.length === 0) {
+    pendingNotice = {
+      level: "warn",
+      html: "All 200 questions have been used in this session. Start a new session to reset the pool."
+    };
+    session.activeRound = null;
+    saveSession(session);
+    render();
+    return;
+  }
+
+  if (poolExhausted.length > 0 || leftoverRemaining > 0) {
+    pendingNotice = {
+      level: "warn",
+      html: "Some domain pools are running low — this round was trimmed to " + questions.length + " question" + (questions.length === 1 ? "" : "s") + "."
+    };
+  } else {
+    pendingNotice = null;
+  }
+
+  session.currentRound = roundNumber;
+  session.activeRound = {
+    round: roundNumber,
+    startedAt: new Date().toISOString(),
+    distribution: distribution,
+    questions: questions.map(q => ({
+      id: q.id, domain: q.domain, scenario: q.scenario || null,
+      q: q.q, opts: q.opts, a: q.a, exp: q.exp,
+      shownAt: new Date().toISOString(), answeredAt: null, chosen: null, isCorrect: null
+    })),
+    userAnswers: {},   // id -> letter
+    submitted: false
+  };
+  saveSession(session);
+  render();
+  scrollToTop();
+}
+
+function onAnswerOption(qId, letter) {
+  const round = session.activeRound;
+  if (!round || round.submitted) return;
+  const qInRound = round.questions.find(q => q.id === qId);
+  if (!qInRound) return;
+  const now = new Date().toISOString();
+  if (!qInRound.answeredAt) qInRound.firstAnsweredAt = now;
+  qInRound.answeredAt = now;
+  qInRound.chosen = letter;
+  round.userAnswers[qId] = letter;
+  saveSession(session);
+  // Light re-render: update just this card visually without full rebuild
+  const host = document.getElementById("questions");
+  const idx = round.questions.findIndex(q => q.id === qId);
+  const card = host.querySelector('.question-card[data-idx="' + idx + '"]');
+  if (card) {
+    card.classList.add("answered");
+    card.querySelectorAll(".option").forEach(o => {
+      o.classList.toggle("selected", o.dataset.choice === letter);
+    });
+  }
+  updateProgressBar();
+}
+
+function onSubmitRound() {
+  const round = session.activeRound;
+  if (!round || round.submitted) return;
+
+  const total = round.questions.length;
+  const answered = Object.keys(round.userAnswers).length;
+  const btn = document.getElementById("submit-btn");
+  const warning = document.getElementById("unanswered-warning");
+
+  if (answered < total) {
+    const missing = total - answered;
+    if (btn.dataset.confirmPending !== "true") {
+      warning.textContent = missing + " question" + (missing > 1 ? "s" : "") + " unanswered. Unanswered questions count as incorrect. Submit anyway?";
+      warning.classList.add("visible");
+      btn.dataset.confirmPending = "true";
+      btn.textContent = "Confirm Submit";
+      return;
+    }
+  }
+
+  // Finalize every question
+  const byDomain = { 1:{asked:0,correct:0}, 2:{asked:0,correct:0}, 3:{asked:0,correct:0}, 4:{asked:0,correct:0}, 5:{asked:0,correct:0} };
+  let correct = 0;
+  const now = new Date().toISOString();
+  for (const q of round.questions) {
+    byDomain[q.domain].asked++;
+    q.isCorrect = q.chosen === q.a;
+    if (q.isCorrect) { correct++; byDomain[q.domain].correct++; }
+    // timeMs: answered - shown (or null if unanswered)
+    if (q.firstAnsweredAt) {
+      q.timeMs = new Date(q.answeredAt) - new Date(q.shownAt);
+    } else {
+      q.timeMs = null;
+    }
+    // Remove the opts/q/exp/a fields from the log-persisted copy to keep the payload small
+    delete q.opts;
+    delete q.q;
+    delete q.exp;
+    delete q.a;
+    // retain: id, domain, scenario, shownAt, answeredAt, firstAnsweredAt, chosen, correct letter? Let's keep correct letter separately.
+  }
+
+  // Re-fetch correct letters for logging
+  for (const q of round.questions) {
+    const source = QUESTION_BANK.find(x => x.id === q.id);
+    q.correct = source.a;
+  }
+
+  round.endedAt = now;
+  round.submitted = true;
+  round.correct = correct;
+  round.total = total;
+  round.scalePct = Math.round((correct / total) * 100);
+  round.scaledScore = Math.round(100 + (correct / total) * 900);
+  round.byDomain = byDomain;
+
+  // Add question IDs to askedIds
+  for (const q of round.questions) {
+    if (!session.askedIds.includes(q.id)) session.askedIds.push(q.id);
+  }
+
+  // Move activeRound into rounds history
+  session.rounds.push(round);
+  session.activeRound = null;
+  saveSession(session);
+
+  warning.classList.remove("visible");
+  btn.dataset.confirmPending = "";
+  render();
+
+  // Scroll to the results panel
+  document.getElementById("results-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function onStartNextRound() {
+  startRound((session.rounds.length || 0) + 1);
+}
+
+// ==========================================================================
+// Export
+// ==========================================================================
+
+function buildLogJson() {
+  const snapshot = session ? JSON.parse(JSON.stringify(session)) : { empty: true };
+  snapshot.exportedAt = new Date().toISOString();
+  return JSON.stringify(snapshot, null, 2);
+}
+
+function onCopyLog() {
+  const text = buildLogJson();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("btn-copy-log");
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }).catch(() => {
+    alert("Copy failed; use Download JSON instead.");
+  });
+}
+
+function downloadLog() {
+  const text = buildLogJson();
+  const ts = new Date().toISOString().replace(/[:.]/g, "-");
+  const sid = session ? session.sessionId.split("-")[0] : "session";
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "adaptive-exam-" + sid + "-" + ts + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ==========================================================================
+// Init
+// ==========================================================================
+
+document.getElementById("btn-new-session").addEventListener("click", onStartNewSession);
+document.getElementById("btn-continue").addEventListener("click", onContinueSession);
+document.getElementById("btn-end").addEventListener("click", onEndSession);
+document.getElementById("btn-reset").addEventListener("click", onClearSession);
+document.getElementById("submit-btn").addEventListener("click", onSubmitRound);
+document.getElementById("next-round-btn").addEventListener("click", onStartNextRound);
+document.getElementById("btn-copy-log").addEventListener("click", onCopyLog);
+document.getElementById("btn-download-log").addEventListener("click", downloadLog);
+
+render();
+
+// Warn when leaving mid-round with unsaved submit
+window.addEventListener("beforeunload", function(e) {
+  if (session && session.activeRound && !session.activeRound.submitted) {
+    const answered = Object.keys(session.activeRound.userAnswers).length;
+    if (answered > 0) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  }
+});
+</script>
+</body>
+</html>

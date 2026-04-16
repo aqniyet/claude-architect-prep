@@ -212,6 +212,11 @@
     background: rgba(91,224,181,0.04);
   }
 
+  .note.warn {
+    border-left: 3px solid var(--red);
+    background: rgba(248,113,113,0.05);
+  }
+
   .note-label {
     font-size: 0.75rem;
     font-weight: 600;
@@ -223,6 +228,7 @@
   .note.key .note-label { color: var(--accent); }
   .note.think .note-label { color: var(--blue); }
   .note.build .note-label { color: var(--teal); }
+  .note.warn .note-label { color: var(--red); }
 
   /* Code */
   code {
@@ -407,6 +413,7 @@
         <li><a href="#ch1-4">Path-scoped rules and when you need them</a></li>
         <li><a href="#ch1-5">Skills and their frontmatter</a></li>
         <li><a href="#ch1-6">Running Claude Code in CI/CD</a></li>
+        <li><a href="#ch1-7">Execution modes: Plan vs Direct</a></li>
       </ul>
     </li>
     <li>
@@ -437,6 +444,7 @@
         <li><a href="#ch4-2">Session management: resume, fresh start, fork</a></li>
         <li><a href="#ch4-3">Preserving facts across summarization</a></li>
         <li><a href="#ch4-4">Provenance: keeping track of where things came from</a></li>
+        <li><a href="#ch4-5">Attention dilution and prompt chaining</a></li>
       </ul>
     </li>
   </ul>
@@ -586,7 +594,23 @@ Each test file needs at least one integration test.</div>
       <tr><td>Standards for a file type spread across many directories</td><td><code>.claude/rules/</code> with glob patterns</td></tr>
     </table>
 
-    <p>There's also <code>@import</code> syntax for keeping CLAUDE.md modular &mdash; you can reference external files from within CLAUDE.md to avoid one massive file.</p>
+    <h4>Keeping CLAUDE.md modular with <code>@import</code></h4>
+    <p>A 900-line root CLAUDE.md is hard to navigate and hard to maintain. The fix isn't to scatter the content into subdirectories &mdash; it's to keep one authoritative CLAUDE.md that <strong>imports</strong> topic-specific files from <code>.claude/rules/</code>:</p>
+
+    <div class="codeblock"><span class="comment"># CLAUDE.md (project root) &mdash; short, scannable, uses imports</span>
+# Engineering standards
+
+@.claude/rules/api-conventions.md
+@.claude/rules/testing.md
+@.claude/rules/database-patterns.md
+@.claude/rules/deployment.md</div>
+
+    <p><code>@import</code> pulls the referenced file's contents into the loaded instruction set. Each file stays focused on one topic, the root CLAUDE.md acts as an index, and topic files can optionally use <code>paths:</code> frontmatter for glob scoping.</p>
+
+    <div class="note warn">
+      <div class="note-label">Antipattern: fragmenting by subdirectory</div>
+      Moving each section into <code>api/CLAUDE.md</code>, <code>tests/CLAUDE.md</code>, etc. looks organized but breaks the model: testing rules, deployment rules, and API conventions apply across the whole repo, not only to files under a specific folder. Directory-level CLAUDE.md is for standards that really are local to that directory &mdash; not a substitute for modular imports.
+    </div>
   </div>
 
   <div class="lesson" id="ch1-5">
@@ -664,6 +688,53 @@ claude "Review this PR for security issues"
     <div class="note build">
       <div class="note-label">Building On This</div>
       CI context also matters for review quality. A Claude session that generated code is less effective at reviewing its own changes &mdash; it retains its reasoning context and is less likely to question its own decisions. A separate, independent review instance is more effective. This connects to Domain 4's multi-pass review concepts.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch1-7">
+    <h3>Execution Modes: Plan vs Direct</h3>
+
+    <p>Claude Code can take two paths once you ask it to change code. <strong>Direct execution</strong> edits files immediately. <strong>Plan mode</strong> forces Claude to write a plan first and wait for your approval before touching anything. Picking the right mode matters because each carries its own cost: direct execution risks shipping a change you didn't think through, but Plan mode adds a review round-trip that's pure overhead when the work is obvious.</p>
+
+    <p>The decision is about <strong>how much is undecided</strong>, not how risky the change feels:</p>
+
+    <table>
+      <tr><th>Situation</th><th>Mode</th><th>Why</th></tr>
+      <tr>
+        <td>Bug with a known fix in one function, stack trace already read</td>
+        <td>Direct</td>
+        <td>No design decisions left. Planning would just restate the fix.</td>
+      </tr>
+      <tr>
+        <td>Localized refactor in a single file</td>
+        <td>Direct</td>
+        <td>Scope is visible; there's nothing to pre-align on.</td>
+      </tr>
+      <tr>
+        <td>Multi-file change touching shared abstractions</td>
+        <td>Plan</td>
+        <td>Multiple valid approaches exist; align on one before edits propagate.</td>
+      </tr>
+      <tr>
+        <td>New feature with unclear integration points</td>
+        <td>Plan</td>
+        <td>You want to catch a wrong architectural direction on paper, not in diffs.</td>
+      </tr>
+      <tr>
+        <td>Anything where a subagent still needs to explore first</td>
+        <td>Plan (or Explore first, then Direct)</td>
+        <td>Until scope is known, a plan can't be evaluated.</td>
+      </tr>
+    </table>
+
+    <div class="note warn">
+      <div class="note-label">Antipattern: Plan mode as a default safety net</div>
+      Treating Plan mode as "the safe choice for every change" is wrong. For well-scoped, well-understood fixes it's <em>overhead</em>, not safety &mdash; and on the exam, options like "every change should start with a plan to avoid regression" are distractors. Plan mode is earned by ambiguity, not granted by caution.
+    </div>
+
+    <div class="note key">
+      <div class="note-label">The Test</div>
+      Ask: <em>"Is there a decision I'd want to approve before any files change?"</em> If yes &rarr; Plan. If the only decision is "go fix the thing I already told you to fix" &rarr; Direct.
     </div>
   </div>
 </div>
@@ -1016,7 +1087,30 @@ required: ["vendor_name", "total_amount"] <span class="comment">// Only truly re
       <li>Tools from all configured servers are discovered at connection time and available simultaneously.</li>
     </ul>
 
-    <p><strong>MCP resources</strong> are a separate concept from tools. Resources are content catalogs (issue summaries, doc hierarchies, database schemas) that give Claude visibility into available data without requiring exploratory tool calls. Think of resources as "what's available" and tools as "how to act."</p>
+    <h4>Resources vs tools: visibility vs actions</h4>
+    <p>MCP servers expose two primitives that are easy to confuse:</p>
+
+    <table>
+      <tr><th></th><th>Tools</th><th>Resources</th></tr>
+      <tr><td>Purpose</td><td><strong>Do</strong> something &mdash; call an API, run a query, send a message.</td><td><strong>Show</strong> what's available &mdash; content catalogs the agent can browse.</td></tr>
+      <tr><td>Examples</td><td><code>create_ticket</code>, <code>run_query</code>, <code>send_email</code></td><td>Issue list, documentation hierarchy, database schema, research topic catalog</td></tr>
+      <tr><td>When the agent pays for it</td><td>Every invocation is a tool call in the trace.</td><td>Visible without a tool call &mdash; the agent sees the inventory as context.</td></tr>
+    </table>
+
+    <p>The typical exam trap: an agent is wasting turns calling a <code>list_topics</code> or <code>get_inventory</code> tool at the start of every session just to discover what exists. A tool is the wrong primitive for that &mdash; the right answer is to expose the inventory as an <strong>MCP resource</strong>. The agent sees availability up-front, skips the exploratory call, and uses tools only when it's time to act.</p>
+
+    <div class="note key">
+      <div class="note-label">Decision Rule</div>
+      <p><strong>"What can I do?"</strong> &rarr; tool.</p>
+      <p><strong>"What exists for me to work on?"</strong> &rarr; resource.</p>
+      <p>If the agent is burning tool calls just to enumerate catalog content, you probably needed a resource.</p>
+    </div>
+
+    <p>Two related distractors worth rejecting:</p>
+    <ul>
+      <li><strong>Stuffing the full inventory into the system prompt</strong> &mdash; wastes tokens on data rarely fully used and doesn't scale as the catalog grows.</li>
+      <li><strong>Caching the inventory behind a "lighter" tool</strong> &mdash; still a tool call, still exploratory, still the wrong primitive.</li>
+    </ul>
 
     <p>When choosing whether to build a custom MCP server or use an existing one: prefer community/existing servers for standard integrations (GitHub, Jira). Build custom servers only for team-specific workflows.</p>
   </div>
@@ -1160,6 +1254,50 @@ CASE FACTS:
     <div class="note build">
       <div class="note-label">Connecting The Dots</div>
       Provenance ties back to schema design from Chapter 2. The synthesis agent's output schema should have fields for source, date, and confidence &mdash; and these should be <strong>required</strong> fields (since sources should always be cited). Meanwhile, uncertain facts should use the patterns from Chapter 2: <code>"unclear"</code> enums, <code>conflict_detected</code> booleans, separate <code>stated_value</code> and <code>calculated_value</code> fields.
+    </div>
+  </div>
+
+  <div class="lesson" id="ch4-5">
+    <h3>Attention Dilution and Prompt Chaining</h3>
+
+    <p>A 14-file pull request shoved into a single review prompt doesn't fail because the context window is too small &mdash; a larger window wouldn't help. It fails because the model's attention is spread thin across too many simultaneous concerns. Symptoms: thorough analysis on some files, superficial comments on others, contradictory findings between files. This is <strong>attention dilution</strong>, and it's a workflow problem, not a context-size problem.</p>
+
+    <h4>The fix: prompt chaining</h4>
+    <p>Split one diluted pass into a sequence of focused passes, each scoped to one concern:</p>
+
+    <div class="codeblock"><span class="comment"># Instead of: one prompt reviewing all 14 files at once</span>
+
+<span class="comment"># Do: per-file passes for local issues</span>
+for file in pr.files:
+    review_local_issues(file)   <span class="comment"># consistent depth, one file's attention budget</span>
+
+<span class="comment"># Then: a separate integration pass for cross-file concerns</span>
+review_cross_file_interactions(pr.files)  <span class="comment"># focused on data flow, not syntax</span></div>
+
+    <p>Each pass has a narrow job and gets the full attention budget for it. Local issues (naming, nulls, error handling) get consistent per-file depth; integration issues (changed signatures, broken contracts) get a pass that isn't distracted by per-file noise.</p>
+
+    <h4>Why common alternatives are wrong</h4>
+    <table>
+      <tr><th>Alternative</th><th>Why it fails</th></tr>
+      <tr>
+        <td>"Switch to a larger context window."</td>
+        <td>Context <em>size</em> isn't the bottleneck &mdash; attention <em>quality</em> is. A bigger window holds more tokens with the same dilution problem.</td>
+      </tr>
+      <tr>
+        <td>"Run three independent review passes and only flag issues that appear in &ge;2."</td>
+        <td>Ensemble voting suppresses <strong>rare-but-real</strong> signals. A real bug that only one pass catches gets filtered out as noise. Voting works for high-prevalence consensus tasks, not bug hunting.</td>
+      </tr>
+      <tr>
+        <td>"Force developers to submit smaller PRs."</td>
+        <td>Shifts the cost to humans to work around a workflow flaw that decomposition would fix.</td>
+      </tr>
+    </table>
+
+    <div class="note key">
+      <div class="note-label">Decision Rule</div>
+      <p><strong>Inconsistent depth across items in one prompt</strong> &rarr; chain per-item passes, then an integration pass.</p>
+      <p><strong>Low-signal items drowning out high-signal ones</strong> &rarr; decompose, don't vote.</p>
+      <p>Ensemble voting is for tasks with a <em>clear majority-truth</em>, not for bug detection where any single detection could be the real one.</p>
     </div>
   </div>
 </div>
