@@ -6,6 +6,11 @@ instructor_*.pdf
 .claude/
 .playwright-mcp/
 
+# Node — used only by _render-pdf.js
+node_modules/
+package-lock.json
+*.tmp.html
+
 # OS files
 .DS_Store
 Thumbs.db

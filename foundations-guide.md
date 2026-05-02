@@ -108,6 +108,51 @@ The exam pattern: a wrong answer often offers "switch to a model with a larger c
 
 Treat "use a bigger model" the same way you treat "raise the temperature" or "add more emphasis to the prompt": almost always a distractor.
 
+## 0.8 Anatomy of a Messages API call
+
+The Anthropic Messages API takes a `messages` array, each entry having a `role` (`"user"` or `"assistant"`) and `content`. Content is either a string or an array of typed **blocks**:
+
+| Block type | Where it appears | Purpose |
+|---|---|---|
+| `text` | both | Plain text |
+| `image` | user (mostly) | base64, URL, or file_id image |
+| `document` | user | PDF passed to the model |
+| `tool_use` | assistant | The model is calling a tool (`id`, `name`, `input`) |
+| `tool_result` | **user** | Your reply to a `tool_use` (`tool_use_id`, `content`, optional `is_error`) |
+| `thinking` | assistant | Extended-thinking output (carries a `signature` you must not modify) |
+
+Top-level request fields: `model`, `max_tokens`, `system`, `tools`, `tool_choice`, `temperature`, `stop_sequences`, `stream`, `metadata`. Response fields: `id`, `role`, `content`, `stop_reason`, `stop_sequence`, `usage` (`input_tokens`, `output_tokens`, `cache_creation_input_tokens`, `cache_read_input_tokens`).
+
+Two rules people miss:
+
+1. **Tool results live in user messages.** When the assistant emits `tool_use`, your reply has `role: "user"` containing one or more `tool_result` blocks. Putting them in an assistant message is a `400`.
+2. **Replayed assistant turns must keep their full block ordering and any `thinking` signatures.** You cannot edit the assistant's prior content and re-send. The signature is a tamper-check; tampering returns a `400` or silently hurts the next turn's reasoning.
+
+## 0.9 Streaming
+
+Set `stream: true` and the API returns Server-Sent Events. The events you'll see:
+
+| Event | Meaning |
+|---|---|
+| `message_start` | Response shell with empty content |
+| `content_block_start` | A new block (`text` / `tool_use` / `thinking`) is opening |
+| `content_block_delta` | Incremental content; for `tool_use` blocks the delta is `input_json_delta` (partial JSON) |
+| `content_block_stop` | The block has finished — its content is now complete |
+| `message_delta` | Final-message updates: `stop_reason`, `usage` |
+| `message_stop` | Stream end |
+
+Streaming for tool use: render "Calling `search_database`…" on `content_block_start`, accumulate `input_json_delta` chunks, **execute only on `content_block_stop`**. Don't try to parse partial JSON — it's not valid until the block closes.
+
+## 0.10 What changes between Claude model families
+
+Across Claude 4.x:
+
+- **Opus** — hardest reasoning, most capable agentic work, highest cost.
+- **Sonnet** — balanced production default.
+- **Haiku** — cheap and fast: tool routing, classification, extraction.
+
+Capabilities (extended thinking, vision, PDFs, prompt caching, batch, citations, tool use) are stable across the 4.x line. Never hardcode capability checks against a fixed model string in production. When an exam question offers "switch to a bigger model" as a fix, treat it as a distractor unless what's missing is a *capability*, not *quality*.
+
 ---
 
 # PART 1 — Domain 1: Agentic Architecture & Orchestration (27% of the exam)
@@ -302,6 +347,77 @@ Use **structural checks** instead: does the math sum? Does the source URL exist?
 - "Use a bigger context window / smarter model" — doesn't fix attention quality, doesn't fix decomposition, doesn't fix prompt-vs-hook decisions.
 - "Tell the agent to be careful" — never an answer.
 
+## 1.12 The full hook taxonomy (Agent SDK)
+
+Beyond `PreToolUse` and `PostToolUse`, the Agent SDK fires hooks at every interesting transition. They map 1:1 to Claude Code hook events (§3.11):
+
+| Event | Fires | Use for |
+|---|---|---|
+| `PreToolUse` | Before each tool call | Block, modify, prerequisite gate |
+| `PostToolUse` | After each tool result | Normalize, trim, log, chain |
+| `UserPromptSubmit` | Each new user message | Inject context, scrub PII, attach a "case-facts" block (§5.3) |
+| `Stop` | The loop is about to terminate (`end_turn`) | Force a final QA pass, persist scratchpad |
+| `SubagentStop` | A subagent has finished | Validate output shape; reject and re-delegate |
+| `PreCompact` | Before `/compact` runs | Pin must-keep facts so they survive compaction |
+| `SessionStart` | Session is opening | Load case-facts file, set defaults, warm caches |
+| `SessionEnd` | Session is closing | Flush telemetry, sync scratchpad |
+| `Notification` | Side-channel message to user | Custom alerting / integration |
+
+A common exam trap: "How do I inject extra context on every user message?" Answer: a **`UserPromptSubmit` hook**, not "modify the system prompt" or "tell the user to paste it." Symmetrically, "How do I make sure scratchpad notes survive `/compact`?" Answer: **`PreCompact` hook** that re-pins them.
+
+## 1.13 Subagent definition files (`.claude/agents/`)
+
+Distinct from skills (§3.4). Subagent files live at `.claude/agents/<name>.md` and define a **delegatable specialist** the coordinator's `Task` tool can target by name.
+
+```yaml
+---
+name: code-reviewer
+description: Review pending changes for bugs and security issues
+tools: ["Read", "Grep", "Glob", "Bash(git diff:*)"]
+model: claude-haiku-4-5
+---
+You are a code reviewer. Focus on logic bugs, security issues, and breaking API
+changes. Skip style. Return findings as a JSON array of {file, line, severity, issue}.
+```
+
+| Field | Effect |
+|---|---|
+| `name` | Identifier the coordinator uses to spawn the subagent |
+| `description` | What the coordinator sees when deciding whom to delegate to |
+| `tools` | Tool allowlist (subset of the parent's set, permission-rule grammar §3.10) |
+| `model` | Optional override — Haiku for cheap classifiers, Opus for hard analysis |
+
+**Skill vs subagent vs slash command — pick one:**
+
+| Need | Use |
+|---|---|
+| A deterministic step-by-step procedure (Claude reads the markdown and follows it) | **Skill** |
+| An independent investigation that returns a summary | **Subagent** (spawned via `Task`) |
+| A reusable user-invoked prompt template | **Slash command** |
+
+A skill runs in the same session by default; a subagent always runs in isolation; a slash command is just a prompt template. Confusing them is a frequent exam wrong-answer pattern.
+
+## 1.14 Thinking blocks across the loop
+
+When extended thinking is on, the assistant's response may contain `thinking` blocks alongside `text` and `tool_use`. **You must preserve them — including the `signature` field — verbatim when you replay the assistant turn back to the API.** Stripping or modifying them either returns a `400` or silently degrades the next turn's reasoning because the chain-of-thought integrity is broken.
+
+Practical rules:
+
+- The loop's `messages` array stores `thinking` blocks alongside everything else — don't filter them out.
+- Don't summarize, redact, or reformat thinking content before resending.
+- Don't expose raw thinking to end users — keep it server-side.
+- **Interleaved thinking** (Sonnet/Opus 4.x): the model can think *between* tool calls in the same turn. Same preservation rule applies — every `thinking` block keeps its signature.
+
+## 1.15 Streaming partial tool input
+
+When streaming, tool-use input arrives as a sequence of `input_json_delta` chunks. The right pattern:
+
+1. On `content_block_start` for a `tool_use` block, render a "tool starting" placeholder (the tool `name` is already known).
+2. Accumulate `input_json_delta` chunks — do **not** parse them yet.
+3. On `content_block_stop`, you have a complete JSON object. Now execute.
+
+Do not try to parse partial JSON. It is not valid until the block closes.
+
 ---
 
 # PART 2 — Domain 2: Tool Design & MCP Integration (18% of the exam)
@@ -453,6 +569,58 @@ The right way to explore an unfamiliar codebase is **incremental**: Grep for ent
 - **Cost hints** belong in the **tool description**, not the system prompt — that way they apply wherever the tool is exposed.
 - **Build vs buy**: prefer existing community MCP servers for standard integrations (GitHub, Jira). Build custom only for team-specific workflows.
 - **Trim tool outputs at source** — adding a `fields: [...]` param or providing a slim variant (`get_customer_summary`) is cheaper than every agent post-filtering.
+
+## 2.14 MCP transports
+
+Three ways an MCP client connects to a server:
+
+| Transport | Protocol | When to use |
+|---|---|---|
+| `stdio` | Subprocess pipes | Local tools, single-user dev. Default for `claude mcp add`. |
+| `sse` (Server-Sent Events) | HTTP + SSE stream | Remote/shared servers. Long-lived. |
+| `http` (Streamable HTTP) | HTTP, request/response or stream | Modern remote default; supports stateless mode and resumption |
+
+Configuration in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "internal": {
+      "url": "https://mcp.example.com/",
+      "transport": "http"
+    }
+  }
+}
+```
+
+Trap: "How do I share the server with the team?" The transport doesn't fix sharing — the *config location* does. `.mcp.json` (committed) shares; `~/.claude.json` (personal) doesn't (§2.9).
+
+## 2.15 The third MCP primitive: prompts
+
+Beyond tools and resources, MCP servers can expose **prompts**: parameterized prompt templates the user invokes. In Claude Code these surface as slash commands named `/mcp__<server>__<prompt>`. Use them when the *prompt itself* is the reusable unit (e.g. `/mcp__jira__create_ticket_from_thread`), not when an action is the unit (that's a tool) or when ambient data is the unit (that's a resource).
+
+Three primitives, one decision rule:
+
+| Want the user to | Expose as |
+|---|---|
+| Invoke a reusable prompt template | **Prompt** (slash command) |
+| Have the model take an action | **Tool** |
+| Have the model see ambient content | **Resource** |
+
+## 2.16 Stateful vs stateless MCP servers
+
+A server is **stateful** if a session establishes state on the server (open file handles, in-progress transactions). Stateful servers can't be load-balanced naively; reconnection requires session resumption.
+
+A server is **stateless** if every request stands alone. Stateless servers scale horizontally, survive failover, and are the right default for production. Push state into a database or external store, not into the server process.
+
+## 2.17 Roots and sampling (advanced MCP)
+
+- **Roots** — the client tells the server which directories the user has authorized. The server should not assume access beyond declared roots.
+- **Sampling** — the server can request that the client run an LLM completion on its behalf. Useful for servers that need an LLM but shouldn't carry their own API key. Less commonly tested, but appears as a distractor naming question.
 
 ---
 
@@ -620,6 +788,153 @@ Provide existing test files in context so generation doesn't suggest duplicate s
 ## 3.9 Settings-level tool restriction
 
 If a tool (e.g. Bash) must be off-limits in a particular repo, that restriction lives in **settings-level `allowed-tools` permission config**, not in a CLAUDE.md instruction. The structural restriction means the tool isn't even visible to the model — there's nothing for it to skip.
+
+## 3.10 `settings.json` — hierarchy and permission grammar
+
+Three locations, all merged at startup (later overrides earlier):
+
+| File | Scope |
+|---|---|
+| `~/.claude/settings.json` | User-global |
+| `<project>/.claude/settings.json` | Project, **committed** |
+| `<project>/.claude/settings.local.json` | Project, **personal**, gitignored by default |
+
+Common keys:
+
+```json
+{
+  "model": "claude-sonnet-4-6",
+  "permissions": {
+    "allow": ["Bash(git status)", "Bash(git diff:*)", "Read"],
+    "deny": ["Bash(rm:*)", "Write(.env)"],
+    "defaultMode": "default"
+  },
+  "hooks": { "PreToolUse": [...], "Stop": [...] },
+  "env": { "DEBUG": "true" }
+}
+```
+
+**Permission rule grammar** (used in settings.json, slash commands, and subagent files):
+
+| Rule | Matches |
+|---|---|
+| `ToolName` | Any use of that tool |
+| `Bash(git status)` | Exact command |
+| `Bash(git diff:*)` | Prefix match (note the colon) |
+| `Read(/etc/**)` | Glob path |
+| `WebFetch(domain:github.com)` | Domain match for fetchers |
+| `mcp__<server>` | All tools from one MCP server |
+| `mcp__<server>__<tool>` | Specific MCP tool |
+
+**Deny wins over allow** at every layer. A project-level allow does **not** override a user-global deny. This is a frequent trap — users add a project allow expecting it to lift a denial.
+
+## 3.11 Hook events in Claude Code
+
+The same taxonomy as the Agent SDK (§1.12) — Claude Code is the SDK with a CLI on top. settings.json supports:
+
+| Event | Fires |
+|---|---|
+| `PreToolUse` | Before a tool call |
+| `PostToolUse` | After a tool result |
+| `UserPromptSubmit` | User submits a message — can rewrite or inject context |
+| `Stop` | Before Claude returns to idle |
+| `SubagentStop` | A subagent finishes |
+| `PreCompact` | Before `/compact` runs |
+| `SessionStart` | Claude Code session opens |
+| `SessionEnd` | Claude Code session closes |
+| `Notification` | Claude is about to surface a notification |
+
+Hook handlers are shell commands. They receive a JSON payload on stdin and respond via:
+
+- Exit `0` — allow as-is
+- Exit `1` (with stderr) — block (for `PreToolUse`) or display warning
+- Exit `2` — block silently
+- Print a JSON payload on stdout to **mutate** the in-flight value (e.g. `{"hookSpecificOutput": {"additionalContext": "..."}}` for `UserPromptSubmit`)
+
+Hook config example:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "pnpm format" }] }
+    ]
+  }
+}
+```
+
+Trap: "I want to require running `pnpm format` after every `Write`." Answer: a `PostToolUse` hook with `matcher: "Write|Edit"`, **not** "tell Claude in CLAUDE.md to remember." Probabilistic vs deterministic, again (§0.6).
+
+## 3.12 Permission modes
+
+When you start Claude Code, four modes exist:
+
+| Mode | Behavior |
+|---|---|
+| `default` | Prompts for each tool that isn't explicitly allowed |
+| `acceptEdits` | Auto-allow file edits (Read/Write/Edit) but still prompt for Bash and others |
+| `plan` | **Read-only**: no Write/Edit/Bash; the model produces a plan only |
+| `bypassPermissions` | No prompts. Dangerous; for trusted automation only |
+
+In CI you'll typically use `--permission-mode bypassPermissions` (with a tight allowlist) or pre-seed approvals via settings. In local interactive use, `plan` mode is what `/plan` toggles to.
+
+Trap: "Use Claude Code in a deploy job, but stay safe." Wrong: `default` mode (will hang on prompts). Wrong: `bypassPermissions` (no guardrails). Right: a tight `allow` list in settings + `bypassPermissions` for the rest, OR `acceptEdits` if shell access isn't needed.
+
+## 3.13 Output styles and statuslines
+
+- **Output styles** (`.claude/output-styles/<name>.md`) — modify the *system prompt of the conversation itself*, not just response shape. Use for "explain mode" (verbose pedagogy), "concise mode" (no preamble), or domain-specific personas.
+- **Statuslines** — a shell command that emits one line shown at the bottom of the TUI; useful for showing branch, model, token usage, or cost.
+
+Output style ≠ slash command ≠ skill ≠ subagent. Output style changes how Claude behaves *throughout the session*; the others are invoked or delegated.
+
+## 3.14 Headless mode — output formats
+
+`-p` / `--print` puts Claude into headless mode. `--output-format` then takes:
+
+| Value | Result |
+|---|---|
+| `text` (default) | Plain final response |
+| `json` | One JSON object: `{result, cost_usd, duration_ms, ...}` |
+| `stream-json` | Newline-delimited JSON events (one per content block / tool call) |
+
+`stream-json` is the right choice for CI dashboards: every tool call appears as it happens, you can render incremental status, and you parse without stripping markdown. `json` is right when you only need the final answer plus metadata.
+
+`--input-format stream-json` lets you pipe a script of pre-formed messages in (advanced — useful for replaying a structured plan).
+
+## 3.15 `--resume` vs `--continue`
+
+| Flag | Behavior |
+|---|---|
+| `--continue` (or `-c`) | Resume the **most recent** session in the current project — no name needed |
+| `--resume <id>` | Resume a specific session by ID |
+| `--resume` (no id, interactive) | Picker UI |
+
+`--continue` is the everyday "pick up where I left off." `--resume` is for cherry-picking a non-recent session. Both load prior tool results — and §1.6.2 still applies: don't resume into a stale repo.
+
+## 3.16 Slash command file format
+
+A project slash command at `.claude/commands/<name>.md`:
+
+```yaml
+---
+description: "Quickly review staged changes"
+allowed-tools: ["Read", "Bash(git diff:*)"]
+argument-hint: "[optional file path]"
+model: claude-haiku-4-5
+---
+Review the staged changes. Focus on: $ARGUMENTS
+
+If no path was given, review all staged files.
+```
+
+| Frontmatter knob | Effect |
+|---|---|
+| `description` | What the user sees in the slash-command picker |
+| `allowed-tools` | Permission grammar (§3.10) — narrow access without a session-wide setting |
+| `argument-hint` | Placeholder shown when no args were typed (same idea as SKILL.md §3.4.1) |
+| `model` | Optional model override for this command |
+
+`$ARGUMENTS` is replaced with whatever the user typed after `/<name>`. Together these knobs let one command run on Haiku with a tight tool set — the right shape for cheap-and-fast workflows like quick reviews or extractions.
 
 ---
 
@@ -797,6 +1112,77 @@ Wrong patterns:
 - **Extended thinking** trades latency for reasoning depth. Enable for hard reasoning tasks; leave off for structured extraction and simple classification where it doesn't help.
 - **Prompt caching** dramatically reduces cost/latency when a stable 5K+ token prefix is shared across many calls. Always use it for that pattern.
 
+## 4.10 Prompt caching mechanics
+
+The biggest cost-and-latency lever in production. Mark stable prefix content with `cache_control: {"type": "ephemeral"}` and the API stores the prefix; subsequent requests that share it pay a cache-read rate (~10% of input cost) for the cached portion.
+
+```python
+{
+  "system": [
+    {"type": "text", "text": "<long stable system prompt>"},
+    {"type": "text", "text": "<tool catalog>", "cache_control": {"type": "ephemeral"}}
+  ],
+  "messages": [...]
+}
+```
+
+**Rules to memorize:**
+
+- **At most 4 cache breakpoints** per request. Place at semantic boundaries (system, tools, prior turns) — not arbitrarily.
+- **Cache hits require exact-prefix match.** Even a single-token change above the breakpoint invalidates the cache from there forward.
+- **Order matters.** Stable content goes first, volatile content last. A breakpoint only helps if everything *above* it is stable.
+- **Cache is per (org, model, exact prefix).** Switching models breaks the cache.
+- **TTL is 5 minutes** by default; a 1-hour TTL is available where supported (different price point).
+- **What's cacheable:** `system`, `tools`, full `messages` blocks. The volatile final user turn typically isn't cached.
+- **`usage` returns** `cache_creation_input_tokens` (charged at a write premium, ~25% above input) and `cache_read_input_tokens` (charged at ~10% of input).
+
+When a question mentions "we have 5K tokens of stable system prompt and the call rate is dozens per minute," **caching is the fix**. When "every request has a unique system prompt," caching can't help — and that distinction is exactly what wrong answers blur.
+
+## 4.11 Extended thinking
+
+Set `thinking: {"type": "enabled", "budget_tokens": N}` and the model produces internal reasoning before its answer. Properties:
+
+- `budget_tokens` controls how many tokens of thinking are allowed (you pay for them at output rate).
+- Thinking blocks must be preserved across turns (§1.14) — including the `signature`.
+- `interleaved-thinking-2025-05-14` beta lets the model think *between* tool calls in the same turn — useful for multi-step reasoning agents.
+- Don't enable thinking for trivial tasks (extraction, classification) — it's pure cost.
+- Useful for: math, multi-step planning, hard code review, ambiguous policy decisions, nuanced synthesis.
+- Thinking tokens count toward `max_tokens`, so raise `max_tokens` accordingly.
+
+Trap: "Output quality is poor on hard reasoning tasks." Wrong: "lower temperature." Right: "enable extended thinking" or "increase the thinking budget."
+
+## 4.12 Vision and document inputs
+
+Image blocks accept base64, URL, or `file_id` (Files API):
+
+```json
+{"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": "..."}}
+```
+
+Document (PDF) blocks similarly:
+
+```json
+{"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": "..."}}
+```
+
+PDFs are processed page-by-page; the model sees both extracted text *and* rendered page images, so figures and tables are visible. Practical limits: ~32 MB / ~100 pages per request. For huge PDFs, chunk on page boundaries and process focused passes (§5.1 lost-in-the-middle).
+
+## 4.13 Citations
+
+Set `citations: {"enabled": true}` on a document block, and the model returns `citation` content blocks naming source documents and character spans alongside its prose. This is the API-level answer to "How do I prove the model's claim came from the input?" — the same role provenance fields play in schemas (§5.5), with a deterministic span back to the source.
+
+Schema design tip: when you have citations available, require the citation in the schema — don't let the model emit a numeric claim without an attached source span.
+
+## 4.14 Token counting endpoint
+
+Before sending a large request, call `POST /v1/messages/count_tokens` with the same payload (minus `max_tokens`). Response: `{input_tokens: N}`. Use to:
+
+- Decide cache breakpoint placement
+- Decide whether to chunk before sending
+- Avoid 400s on context overruns
+
+Don't approximate from string length — tokenization is non-linear, especially for code and non-Latin scripts.
+
 ---
 
 # PART 5 — Domain 5: Context Management & Reliability (15% of the exam)
@@ -913,6 +1299,55 @@ For multi-region agents (US, EU, AP), inject a `region` field in a structured se
 ## 5.13 Internal consistency
 
 When a synthesis output quotes different numbers in adjacent paragraphs: **first emit a structured fact table**, then have the narrative cite entries from that table. Inconsistency becomes detectable (and prevented).
+
+## 5.14 Cost-aware architecture
+
+Real exam questions hide cost decisions. The math you should hold in your head:
+
+- **Output is roughly 5× input.** Verbose responses are the main cost driver. Cap `max_tokens`. Use schema-bound outputs (§4.3) — they're naturally short.
+- **Cache reads ≈ 10% of input.** Stable prefixes pay back fast — break-even is typically after 1–2 hits.
+- **Batch is 50% off** but accepts a ≤ 24h tail (§4.7).
+- **Smaller models 5–10× cheaper.** Use Haiku for tool-routing, classification, simple extraction. Sonnet for production reasoning. Opus only where it pays back.
+- **Cache + batch combine.** Batch jobs can hit caches if the prefix has been written recently.
+- **Tool result trimming** (§5.2) is a cost lever, not just a context lever — every kept token is paid for at output multiplied by however many turns it survives.
+
+Decision tree for a new pipeline:
+
+1. Latency-tolerant (≥ 1h)? → Batch.
+2. Repeated stable prefix (≥ ~1024 tokens, ≥ 2 calls per 5 min)? → Cache.
+3. Per-call extraction or classification? → Haiku + `tool_use` schema.
+4. Hard reasoning, ambiguous data? → Sonnet/Opus + extended thinking budget.
+
+A common exam pattern is "we want lower cost without losing reliability." Wrong answers reach for "use a smaller model" alone (drops quality) or "shorten the prompt" alone (loses criteria). Right answers stack: **cache the stable prefix, route classifications to Haiku, batch the nightly audit, cap `max_tokens` on the chatty path.**
+
+## 5.15 Rate limits and retries
+
+The API enforces RPM, TPM (tokens-per-minute, separate input/output), and concurrent-request limits per organization. On overrun:
+
+- HTTP `429` with `retry-after` header (seconds). Honor it.
+- HTTP `529` (overloaded). Back off exponentially.
+- HTTP `5xx`. Retry with jitter.
+
+Production retry policy:
+
+- Retry **only idempotent operations** by default. The Anthropic SDK auto-retries safe failures.
+- Cap retries (3–5) to avoid amplification storms.
+- Use **exponential backoff with full jitter** — `sleep = random(0, base * 2^n)` — not constant or linear backoff.
+- Track per-tool retry budgets so a flaky downstream doesn't burn your shared quota.
+
+For multi-agent pipelines, idempotency (§1.8) becomes critical — retries during partial-progress states are the canonical cause of duplicate refunds, double-sent emails, etc.
+
+## 5.16 Observability
+
+Production agents need:
+
+- **Per-turn structured logs**: `request_id`, model, input/output token counts, cache hit, tool calls, `stop_reason`.
+- **Cost telemetry per session and per user.** Costs blow up via long sessions, not single requests.
+- **Tool-call traces** — which tool, sanitized args, latency, error category (§2.6).
+- **Coverage metrics for multi-agent pipelines** — "X% of reports flagged a coverage gap" is the signal that coordinator decomposition needs work (§1.3.4).
+- **Confidence vs. accuracy plots** to detect calibration drift (§4.6, §5.11).
+
+The natural emit points are hook events (`PostToolUse`, `Stop`, `SubagentStop`, `SessionEnd`) — keep telemetry out of the model's prompt and out of tool implementations.
 
 ---
 
@@ -1143,6 +1578,95 @@ Exit code: standard POSIX, non-zero on failure.
 | Conditional rules in CI | `.claude/rules/` with `paths` |
 | Shared backend integration | `.mcp.json` with env-var secrets |
 | Personal experimental tool | `~/.claude.json` |
+
+## 8.13 Hook events (Agent SDK and Claude Code)
+
+| Event | Used for |
+|---|---|
+| `PreToolUse` | Block / modify / gate prerequisites |
+| `PostToolUse` | Normalize / trim / log / chain |
+| `UserPromptSubmit` | Inject context, scrub, attach case-facts |
+| `Stop` / `SubagentStop` | Final QA, persist scratchpad |
+| `PreCompact` | Pin must-keep facts |
+| `SessionStart` / `SessionEnd` | Load defaults, flush telemetry |
+| `Notification` | Custom alerts |
+
+## 8.14 Permission modes
+
+| Mode | Behavior |
+|---|---|
+| `default` | Prompts for unallowed tools |
+| `acceptEdits` | Auto-allows file edits, prompts for the rest |
+| `plan` | Read-only; produces a plan |
+| `bypassPermissions` | No prompts (CI only, with a tight allowlist) |
+
+## 8.15 Headless output formats
+
+| Format | When |
+|---|---|
+| `text` | Human-readable |
+| `json` | Final answer + metadata in one object |
+| `stream-json` | Per-event NDJSON; right for dashboards |
+
+## 8.16 MCP transports and primitives
+
+| Transport | When |
+|---|---|
+| `stdio` | Local dev, single user |
+| `sse` | Remote, long-lived, streaming |
+| `http` | Modern remote default; supports stateless |
+
+| Primitive | The unit of reuse is |
+|---|---|
+| Tool | An action |
+| Resource | Ambient content |
+| Prompt | A reusable prompt template (slash command) |
+
+## 8.17 Permission rule grammar
+
+| Rule | Matches |
+|---|---|
+| `Bash(git status)` | Exact command |
+| `Bash(git diff:*)` | Prefix match |
+| `Read(/etc/**)` | Glob path |
+| `WebFetch(domain:x.com)` | Domain |
+| `mcp__server` | All tools from that server |
+| `mcp__server__tool` | Specific MCP tool |
+
+**Deny wins over allow** at every layer.
+
+## 8.18 Cost levers
+
+| Lever | Effect |
+|---|---|
+| Prompt cache hit | ~10% of input cost on cached prefix |
+| Prompt cache write | ~125% of input cost (one-time) |
+| Batch API | 50% off, ≤ 24h tail |
+| Haiku vs Sonnet | 5–10× cheaper for routing/classification |
+| `max_tokens` cap | Proportional savings on output |
+| Tool output trim | Saves output × turns surviving |
+
+## 8.19 Block types in the Messages API
+
+| Block | Where | Notes |
+|---|---|---|
+| `text` | both | Plain text |
+| `image` | user | base64, URL, or `file_id` |
+| `document` | user | PDF — page-by-page |
+| `tool_use` | assistant | Has `id`, `name`, `input` |
+| `tool_result` | **user** | Replies to a `tool_use` |
+| `thinking` | assistant | Preserve `signature` verbatim |
+
+## 8.20 Streaming events
+
+| Event | Meaning |
+|---|---|
+| `message_start` | Response shell |
+| `content_block_start` | New block opening |
+| `content_block_delta` | Incremental content (`input_json_delta` for tools) |
+| `content_block_stop` | Block complete — execute tool here |
+| `message_delta` | Final `stop_reason` / `usage` |
+| `message_stop` | End of stream |
 
 ---
 

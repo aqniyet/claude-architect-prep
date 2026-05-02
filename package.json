@@ -1,0 +1,12 @@
+{
+  "name": "claude-architect-prep",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Study materials for the Claude Certified Architect exam",
+  "scripts": {
+    "render-pdf": "node _render-pdf.js"
+  },
+  "dependencies": {
+    "marked": "^14.1.0"
+  }
+}
